@@ -4,7 +4,8 @@ import api from '../services/api';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { EventModal } from '../components/EventModal';
-import { LayoutDashboard, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, ArrowRight, Sparkles, Calendar, MapPin } from 'lucide-react';
+import '../styles/gallery.css';
 
 export function GalleryPage() {
   const [eventos, setEventos] = useState<any[]>([]);
@@ -13,7 +14,9 @@ export function GalleryPage() {
   const [eventoSelecionado, setEventoSelecionado] = useState<any>(null);
 
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const userString = localStorage.getItem('user');
+  const user = userString ? JSON.parse(userString) : null;
+  
   const categorias = ['Todos', 'Música', 'Teatro', 'Arte', 'Cinema', 'Danças'];
 
   useEffect(() => {
@@ -21,98 +24,54 @@ export function GalleryPage() {
   }, []);
 
   const eventosFiltrados = eventos.filter(ev => {
-    const bateBusca = ev.titulo.toLowerCase().includes(busca.toLowerCase());
+    const bateBusca = ev.titulo?.toLowerCase().includes(busca.toLowerCase());
     const bateCategoria = filtroCat === 'Todos' || ev.categoria_id?.nome === filtroCat;
     return bateBusca && bateCategoria;
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header busca={busca} setBusca={setBusca} />
 
-      <main className="gallery-container" style={{ flex: 1 }}>
-        
-        {/* FILTROS */}
+      <main className="gallery-container">
         <div className="categories-bar">
           {categorias.map(cat => (
-            <button 
-              key={cat}
-              className={`category-pill ${filtroCat === cat ? 'active' : ''}`}
-              onClick={() => setFiltroCat(cat)}
-            >
+            <button key={cat} className={`category-pill ${filtroCat === cat ? 'active' : ''}`} onClick={() => setFiltroCat(cat)}>
               {cat}
             </button>
           ))}
         </div>
 
-        {/* --- BLOCO EXCLUSIVO PARA ADMINISTRADOR / GESTOR --- */}
+        {/* --- BLOCO ADMINISTRADOR / GESTOR --- */}
         {(user?.papel === 'ADMINISTRADOR' || user?.papel === 'GESTOR_PUBLICO') && (
-          <div className="card" style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '40px',
-            border: '2px solid #0f172a', // Borda escura para indicar autoridade
-            background: 'linear-gradient(to right, #ffffff, #f8fafc)',
-            padding: '25px 40px'
-          }}>
+          <div className="admin-shortcut-card" style={{ border: '2px solid #0f172a' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a', marginBottom: '5px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0f172a' }}>
                 <ShieldCheck size={20} />
-                <h2 style={{ margin: 0, fontSize: '20px' }}>Painel de Gestão Pública</h2>
+                <h3 style={{margin: 0}}>Painel de Gestão Pública</h3>
               </div>
-              <p style={{ margin: 0, color: 'var(--gray)', fontSize: '14px' }}>
-                Você pode moderar novas sugestões e gerar relatórios de impacto com IA.
-              </p>
+              <p>Modere sugestões e gere relatórios de impacto com IA.</p>
             </div>
-
-            <button 
-              className="btn-main" 
-              style={{ 
-                width: 'auto', 
-                padding: '12px 25px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '10px',
-                background: '#0f172a', // Cor mais séria para o Admin
-                boxShadow: '0 10px 20px rgba(15, 23, 42, 0.2)' 
-              }}
-              onClick={() => navigate('/admin')} // Vai para a AdminPage
-            >
-              <Sparkles size={18} />
-              Acessar Dashboard
-              <ArrowRight size={18} />
+            <button className="btn-main" style={{ background: '#0f172a', width: 'auto' }} onClick={() => navigate('/admin')}>
+              <Sparkles size={18} /> Acessar Dashboard <ArrowRight size={16} />
             </button>
           </div>
         )}
 
-        {/* --- BLOCO EXCLUSIVO PARA ORGANIZADOR --- */}
+        {/* --- BLOCO ORGANIZADOR --- */}
         {user?.papel === 'ORGANIZADOR' && (
-          <div className="card" style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: '40px',
-            border: '2px solid var(--purple)',
-            padding: '25px 40px'
-          }}>
+          <div className="admin-shortcut-card">
             <div>
-              <h2 style={{ margin: 0, color: 'var(--purple)', fontSize: '20px' }}>Olá, Organizador!</h2>
-              <p style={{ margin: '5px 0 0 0', color: 'var(--gray)', fontSize: '14px' }}>Gerencie seus eventos e crie novos anúncios.</p>
+              <h3>Olá, Organizador!</h3>
+              <p>Gerencie seus eventos e acompanhe as inscrições.</p>
             </div>
-            <button 
-              className="btn-main" 
-              style={{ width: 'auto', padding: '12px 25px', display: 'flex', alignItems: 'center', gap: '10px' }}
-              onClick={() => navigate('/org')}
-            >
-              <LayoutDashboard size={20} />
-              Meu Painel
-              <ArrowRight size={18} />
+            <button className="btn-main" style={{ width: 'auto' }} onClick={() => navigate('/org')}>
+              <LayoutDashboard size={18} /> Meu Painel <ArrowRight size={16} />
             </button>
           </div>
         )}
 
-        <h2 style={{ marginBottom: '30px', textAlign: 'left', fontWeight: '800' }}>
+        <h2 style={{ textAlign: 'left', marginBottom: '30px', color: '#1e293b' }}>
           {filtroCat === 'Todos' ? 'Eventos em Destaque' : `Eventos de ${filtroCat}`}
         </h2>
 
@@ -120,17 +79,15 @@ export function GalleryPage() {
           {eventosFiltrados.map(ev => (
             <div key={ev._id} className="card-event">
               <div className="card-image-wrapper">
-                <img src={ev.foto_url || 'https://via.placeholder.com/400x200'} alt="" />
-                <div className="badge-category">{ev.categoria_id?.nome}</div>
+                <img src={ev.foto_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'} alt={ev.titulo} />
+                <div className="badge-category">{ev.categoria_id?.nome || 'Cultura'}</div>
               </div>
               <div className="card-content">
-                <h3>{ev.titulo}</h3>
-                <div className="event-info-item">📅 {new Date(ev.data_inicio).toLocaleDateString('pt-BR')}</div>
-                <div className="event-info-item">📍 {ev.localizacao?.nome_local}</div>
+                <h3 className="event-title">{ev.titulo}</h3>
+                <div className="event-info-row"><Calendar size={14} /><span>{new Date(ev.data_inicio).toLocaleDateString('pt-BR')}</span></div>
+                <div className="event-info-row"><MapPin size={14} /><span>{ev.localizacao?.nome_local || 'Local não informado'}</span></div>
                 <div className="card-footer">
-                  <button className="btn-main" style={{ borderRadius: '16px' }} onClick={() => setEventoSelecionado(ev)}>
-                    Ver Detalhes
-                  </button>
+                  <button className="btn-details" onClick={() => setEventoSelecionado(ev)}>Ver Detalhes</button>
                 </div>
               </div>
             </div>

@@ -7,10 +7,14 @@ export const errorMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  // Se o erro for uma instância da nossa classe ApiError, usamos o status code dela.
-  // Caso contrário, é um erro inesperado do servidor (status 500).
+  // LOG NO TERMINAL PARA VOCÊ VER O QUE ESTÁ ACONTECENDO
+  console.error("❌ [ERRO NO SERVIDOR]:", error);
+
   const statusCode = error.statusCode ?? 500
-  const message = error.statusCode ? error.message : 'Errouuuuu'
+  const message = error.statusCode ? error.message : 'Erro interno no servidor'
   
-  return res.status(statusCode).json({ message })
+  return res.status(statusCode).json({ 
+    message,
+    stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+  })
 }

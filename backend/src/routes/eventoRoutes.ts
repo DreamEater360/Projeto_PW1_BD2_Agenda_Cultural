@@ -5,31 +5,15 @@ import { upload } from '../config/multer';
 
 const router = Router();
 
-/**
- * ROTAS PÚBLICAS
- * Acessíveis por visitantes anônimos e cidadãos.
- */
-router.get('/', eventoController.index);      // Listar na Galeria
-router.get('/:id', eventoController.show);    // Ver no Modal
+// 1. ROTAS FIXAS (Sempre primeiro)
+router.get('/', eventoController.index);
+router.get('/mine', authMiddleware, eventoController.indexByOrganizer); // <--- DEVE ESTAR AQUI
 
-/**
- * ROTAS PROTEGIDAS
- * Exigem cabeçalho Authorization: Bearer TOKEN
- */
+// 2. ROTAS DINÂMICAS (Sempre por último)
+router.get('/:id', eventoController.show);
 
-// Criar Evento (Apenas Organizadores/Admins conforme regra no Service)
-router.post(
-  '/', 
-  authMiddleware, 
-  upload.single('foto'), // Processa o upload da chave 'foto'
-  eventoController.store
-);
-
-// Alternar entre Visível/Oculto (Toggle)
-router.patch(
-  '/:id/toggle', 
-  authMiddleware, 
-  eventoController.toggleStatus
-);
+// 3. OUTRAS
+router.post('/', authMiddleware, upload.single('foto'), eventoController.store);
+router.patch('/:id/toggle', authMiddleware, eventoController.toggleStatus);
 
 export default router;

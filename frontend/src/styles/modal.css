@@ -1,101 +1,159 @@
+/* Overlay com desfoque no fundo */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px); /* Desfoque premium */
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 3000;
+  z-index: 9999;
   padding: 20px;
 }
 
+/* Container do Modal */
 .modal-content {
   background: white;
   width: 100%;
-  max-width: 680px;
+  max-width: 550px;
   max-height: 90vh;
-  border-radius: 40px; /* Bordas bem arredondadas */
-  overflow-y: auto;
+  border-radius: 28px;
+  overflow-y: auto; /* Permite rolar o conteúdo */
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
+/* --- ESTILIZAÇÃO DA BARRA DE ROLAGEM (Scrollbar) --- */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #e2e8f0; /* Cor da barrinha */
+  border-radius: 10px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* Botão de Fechar discreto sobre a foto */
 .modal-close-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  background: white;
+  top: 15px;
+  right: 15px;
+  background: rgba(252, 2, 2, 0.3); /* Fundo escuro transparente */
+  color: white;
   border: none;
-  width: 45px;
-  height: 45px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   cursor: pointer;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: 0.2s;
 }
 
+.modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transform: scale(1.1);
+}
+
+/* Imagem de topo */
 .modal-header-img {
   width: 100%;
-  height: 280px;
+  height: 250px;
   object-fit: cover;
+  display: block;
 }
 
 .modal-info-section {
-  padding: 35px;
+  padding: 24px;
 }
 
+/* Título e Descrição */
+.modal-info-section h2 {
+  text-align: left;
+  margin: 0 0 8px 0;
+  font-size: 26px;
+  color: #1e293b;
+}
+
+.modal-description {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Grid de Informações */
 .details-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin: 30px 0;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .detail-box {
   background: #f8fafc;
-  padding: 16px;
-  border-radius: 24px;
+  padding: 12px 16px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.detail-box small {
+  display: block;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+
+.detail-box p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Seção do Mapa */
+.modal-map-container {
+  height: 220px; /* Mapa maior e mais importante */
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 15px 0;
   border: 1px solid #f1f5f9;
 }
 
-.detail-icon {
-  background: white;
-  color: var(--purple);
-  padding: 10px;
-  border-radius: 14px;
-  display: flex;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
+/* Botão de Inscrição */
 .interest-btn {
-  background: var(--text);
+  background: #6b21a8;
   color: white;
   border: none;
-  padding: 18px;
-  border-radius: 24px;
-  font-weight: 800;
+  padding: 16px;
+  border-radius: 18px;
+  font-weight: 700;
   font-size: 16px;
-  flex: 1;
+  width: 100%;
   cursor: pointer;
   transition: 0.3s;
+  box-shadow: 0 10px 15px -3px rgba(107, 33, 168, 0.2);
 }
 
-.interest-btn:hover:not(:disabled) {
-  background: var(--purple);
-  transform: scale(1.02);
-}
-
-.interest-btn:disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
+.interest-btn:hover {
+  background: #581c87;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(107, 33, 168, 0.4);
 }
