@@ -1,0 +1,206 @@
+:root {
+  --purple: #6b21a8;
+  --bg: #fdf8f9;
+  --white: #ffffff;
+  --text: #05051f;
+  --gray: #94a3b8;
+  --radius: 32px;
+}
+
+/* 1. Garante que o HTML e o Body ocupem a tela toda */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  min-height: 100vh;
+  background-color: var(--bg); /* O fundo rosado agora é global */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Container para as telas de Login/Registro */
+.auth-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Container da Galeria - Centraliza o conteúdo no meio da página */
+.gallery-container {
+  width: 100vw;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+/* 3. Garante que o card tenha um tamanho bom mas não suma */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+  padding: 40px;
+  width: 100%;
+  max-width: 500px; /* Impede que o card fique largo demais em telas grandes */
+  box-sizing: border-box;
+}
+
+h1, h2 { color: var(--purple); text-align: center; margin-bottom: 20px; font-size: 40px; }
+p.subtitle { text-align: center; color: var(--gray); margin-bottom: 30px; font-size: 14px; }
+
+.input-group { margin-bottom: 15px; }
+
+input {
+  color: #05051f;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 16px;
+  border: 1px solid #ffffff;
+  background: #f8fafc;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+input:focus { outline: none; border-color: var(--purple); background: #fff; }
+
+.btn-main {
+  background: var(--purple);
+  color: rgb(255, 255, 255);
+  border: none;
+  padding: 16px;
+  border-radius: var(--radius);
+  font-weight: bold;
+  font-size: 16px;
+  width: 80%;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(107, 33, 168, 0.3);
+  margin-top: 15px;
+}
+
+.btn-main:hover {
+  background-color: #480d78;
+}
+
+.btn-resg {
+  background: white;
+  color: var(--purple);
+  border: none;
+  padding: 16px;
+  font-weight: bold;
+  font-size: 16px;
+  width: 100%;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius);
+  width: 80%;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.btn-secondary:hover {
+  background-color: #e6eaed;
+}
+
+.role-selector {
+  display: flex;
+  background: #f1f5f9;
+  padding: 5px;
+  border-radius: 20px;
+  margin-bottom: 25px;
+}
+
+.role-btn {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #94a3b8;
+  background: transparent;
+}
+
+.role-btn.active {
+  background: white;
+  color: var(--purple);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+
+/* Header */
+.main-header {
+  background: white;
+  padding: 15px 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  gap: 20px;
+}
+
+.brand-section h1 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--purple);
+}
+
+.location-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--gray);
+  font-size: 13px;
+}
+
+.search-bar-header {
+  flex: 1;
+  max-width: 500px;
+  position: relative;
+}
+
+.search-bar-header input {
+  margin: 0;
+  padding: 12px 20px 12px 45px;
+  border-radius: 50px;
+  background: #f3f4f6;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+/* Footer */
+.main-footer {
+  background: white;
+  padding: 10px 5%;
+  margin-top: 20px;
+  border-top: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.footer-content p {
+  color: var(--gray);
+  font-size: 14px;
+}

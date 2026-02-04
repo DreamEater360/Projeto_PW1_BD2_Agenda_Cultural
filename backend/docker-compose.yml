@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    # Utiliza a imagem oficial do Node na versão exata solicitada
+    image: node:22.19.0
+    container_name: agenda_api
+    
+    # Define o diretório de trabalho dentro do container
+    working_dir: /usr/app
+    
+    # Mapeia a porta da sua API (3333) para o seu computador
+    ports:
+      - "3333:3333"
+    
+    # Sincroniza os arquivos do seu PC com o container
+    volumes:
+      - .:/usr/app
+      # Protege a pasta node_modules para não misturar arquivos do Windows com Linux
+      - /usr/app/node_modules
+    
+    # Carrega suas variáveis de ambiente do arquivo .env
+    env_file:
+      - .env
+    
+    # Instala as dependências e inicia o projeto em modo de desenvolvimento
+    command: sh -c "npm install && npm run dev"
+
+    # Reinicia o container automaticamente se ele falhar
+    restart: always
