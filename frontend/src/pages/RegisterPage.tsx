@@ -42,6 +42,7 @@ export function RegisterPage() {
           )}
           <input type="password" placeholder="Senha" required onChange={e => setFormData({...formData, senha: e.target.value})} />
           <button className="btn-main" type="submit">Finalizar Registro</button>
+          <button className='btn-resg' onClick={() => navigate('/')}>Já tem uma conta?</button>
         </form>
       </div>
     </div>

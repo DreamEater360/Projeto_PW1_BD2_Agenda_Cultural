@@ -20,7 +20,7 @@
   width: 100%;
   max-width: 550px;
   max-height: 90vh;
-  border-radius: 28px;
+  border-radius: 12.5px;
   overflow-y: auto; /* Permite rolar o conteúdo */
   position: relative;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);

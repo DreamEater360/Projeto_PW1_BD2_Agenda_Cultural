@@ -52,7 +52,7 @@ export function Header({ busca, setBusca }: any) {
               <UserCircle size={32} color="var(--purple)" />
             </div>
 
-            <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
+            <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', marginTop: '6.5px' }}>
               <LogOut size={20} />
             </button>
           </div>

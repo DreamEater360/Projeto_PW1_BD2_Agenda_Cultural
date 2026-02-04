@@ -15,82 +15,96 @@ export function EventModal({ evento, onClose }: EventModalProps) {
 
   if (!evento) return null;
 
-  // --- TRATAMENTO DE COORDENADAS PARA GEOJSON ---
-  // MongoDB guarda [lng, lat], Leaflet quer [lat, lng]
+  // --- TRATAMENTO DE COORDENADAS ---
   const coordinates = evento.localizacao?.coordinates;
   const hasCoords = Array.isArray(coordinates) && coordinates.length === 2;
-  
   const position: [number, number] = hasCoords 
     ? [coordinates[1], coordinates[0]] 
-    : [-6.7612, -38.5623]; // Padrão Cajazeiras/PB
+    : [-6.7612, -38.5623];
 
   async function handleInscricao() {
     if (!user) return alert("Você precisa estar logado!");
     setLoading(true);
     try {
-      await api.post('/subscriptions', { eventoId: evento._id });
-      alert("Inscrição confirmada! 🎉");
+      const response = await api.post('/subscriptions', { eventoId: evento._id });
+      alert(response.data.message);
     } catch (err: any) {
-      alert("Erro ao processar inscrição.");
+      alert(err.response?.data?.message || "Erro ao processar inscrição.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-  <div className="modal-overlay" onClick={onClose}>
-  <div className="modal-content" onClick={e => e.stopPropagation()}>
-    
-    {/* Botão de fechar agora fica aqui para aparecer sobre a foto */}
-    <button className="modal-close-btn" onClick={onClose}>
-      X
-    </button>
-    
-    <img 
-      src={evento.foto_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'} 
-      className="modal-header-img" 
-      alt={evento.titulo} 
-    />
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        
+        {/* Botão de fechar sobre a foto */}
+        <button className="modal-close-btn" onClick={onClose} title="Fechar">
+          <X size={20} />
+        </button>
+        
+        <img 
+          src={evento.foto_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'} 
+          className="modal-header-img" 
+          alt={evento.titulo} 
+        />
 
-    <div className="modal-info-section">
-      <h2>{evento.titulo}</h2>
-      <p className="modal-description">{evento.descricao}</p>
+        <div className="modal-info-section">
+          <h2>{evento.titulo}</h2>
+          <p className="modal-description">{evento.descricao}</p>
 
-      <div className="details-grid">
-        <div className="detail-box">
-          <Calendar size={18} color="#6b21a8" />
-          <div>
-            <small>DATA</small>
-            <p>{new Date(evento.data_inicio).toLocaleDateString('pt-BR')}</p>
+          <div className="details-grid">
+            <div className="detail-box">
+              <Calendar size={18} color="#6b21a8" />
+              <div>
+                <small>DATA</small>
+                <p>{new Date(evento.data_inicio).toLocaleDateString('pt-BR')}</p>
+              </div>
+            </div>
+            <div className="detail-box">
+              <Ticket size={18} color="#6b21a8" />
+              <div>
+                <small>VALOR</small>
+                <p>{evento.valor_ingresso > 0 ? `R$ ${evento.valor_ingresso.toFixed(2)}` : 'Gratuito'}</p>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="detail-box">
-          <Ticket size={18} color="#6b21a8" />
-          <div>
-            <small>VALOR</small>
-            <p>{evento.valor_ingresso > 0 ? `R$ ${evento.valor_ingresso}` : 'Gratuito'}</p>
+
+          <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '14px', marginBottom: '15px'}}>
+            <MapPin size={16} color="#6b21a8" />
+            <span>{evento.localizacao?.nome_local}</span>
           </div>
+
+          <div className="modal-map-container">
+            <MapContainer center={position} zoom={15} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Marker position={position} />
+            </MapContainer>
+          </div>
+
+          {/* --- FILTRO DO BOTÃO DE INSCRIÇÃO --- */}
+          {/* O botão só aparece se o status for exatamente 'APROVADO' */}
+          {evento.status === 'APROVADO' ? (
+            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+              <button className="interest-btn" onClick={handleInscricao} disabled={loading}>
+                {loading ? 'Processando...' : 'Confirmar Presença'}
+              </button>
+              <button className="modal-fav-btn" style={{padding: '10px', background: '#f1f5f9', borderRadius: '12px', border: 'none', cursor: 'pointer'}}>
+                <Heart size={24} color="#64748b" />
+              </button>
+            </div>
+          ) : (
+            <div style={{ marginTop: '20px', padding: '15px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '16px', textAlign: 'center' }}>
+               <p style={{ margin: 0, color: '#92400e', fontSize: '14px', fontWeight: '600' }}>
+                 {evento.status === 'PENDENTE' 
+                   ? '⚠️ Este evento é uma sugestão e aguarda aprovação da prefeitura.' 
+                   : '🚫 Este evento não está disponível para inscrições no momento.'}
+               </p>
+            </div>
+          )}
         </div>
       </div>
-
-      <div style={{display: 'flex', alignItems: 'center', gap: '6px', color: '#64748b', fontSize: '14px'}}>
-        <MapPin size={16} color="#6b21a8" />
-        <span>{evento.localizacao?.nome_local}</span>
-      </div>
-
-      {/* Container do Mapa */}
-      <div className="modal-map-container">
-        <MapContainer center={position} zoom={15} style={{ height: '100%', width: '100%' }} zoomControl={false}>
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={position} />
-        </MapContainer>
-      </div>
-
-      <button className="interest-btn" onClick={handleInscricao}>
-        Confirmar Presença
-      </button>
     </div>
-  </div>
-</div>
-);
+  );
 }

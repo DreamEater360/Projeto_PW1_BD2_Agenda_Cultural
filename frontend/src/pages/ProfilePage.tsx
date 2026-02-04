@@ -1,35 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { User, Mail, Shield, Lock, Save, ArrowLeft } from 'lucide-react';
+import { User, Mail, Shield, Lock, Save, ArrowLeft, Calendar, MapPin } from 'lucide-react';
 import '../styles/global.css';
+import '../styles/gallery.css'; // Reutilizar o CSS dos cards
 
 export function ProfilePage() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || 'null');
-
+  
+  const [minhasInscricoes, setMinhasInscricoes] = useState<any[]>([]);
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
 
+  // Carrega as inscrições ao abrir a página
+  useEffect(() => {
+    api.get('/subscriptions/me')
+      .then(res => setMinhasInscricoes(res.data))
+      .catch(() => console.error("Erro ao carregar inscrições"));
+  }, []);
+
   async function handleUpdatePassword(e: React.FormEvent) {
     e.preventDefault();
-
-    if (novaSenha !== confirmarSenha) {
-      return alert("As senhas não coincidem!");
-    }
+    if (novaSenha !== confirmarSenha) return alert("As senhas não coincidem!");
 
     try {
-      await api.patch('/auth/update-password', {
-        senhaAtual,
-        novaSenha
-      });
+      await api.patch('/auth/update-password', { senhaAtual, novaSenha });
       alert("Senha atualizada com sucesso! ✅");
-      setSenhaAtual('');
-      setNovaSenha('');
-      setConfirmarSenha('');
+      setSenhaAtual(''); setNovaSenha(''); setConfirmarSenha('');
     } catch (err: any) {
       alert(err.response?.data?.message || "Erro ao atualizar senha.");
     }
@@ -42,79 +43,65 @@ export function ProfilePage() {
       <Header busca="" setBusca={() => {}} />
 
       <main className="container" style={{ flex: 1, padding: '40px 20px' }}>
-        <button 
-          onClick={() => navigate(-1)} 
-          style={{ background: 'none', border: 'none', color: 'var(--gray)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '20px' }}
-        >
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--gray)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '20px' }}>
           <ArrowLeft size={18} /> Voltar
         </button>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '30px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '30px' }}>
           
-          {/* COLUNA 1: INFORMAÇÕES FIXAS */}
-          <div className="card" style={{ height: 'fit-content' }}>
-            <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-               <div style={{ background: '#fdf8f9', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center', margin: '0 auto 15px auto', border: '2px solid var(--purple)' }}>
+          {/* LADO ESQUERDO: PERFIL E SENHA */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            <div className="card">
+              <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <div style={{ background: '#fdf8f9', width: '80px', height: '80px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px auto', border: '2px solid var(--purple)' }}>
                   <User size={40} color="var(--purple)" />
-               </div>
-               <h2 style={{ margin: 0 }}>{user.nome}</h2>
-               <p style={{ color: 'var(--gray)', fontSize: '14px' }}>Membro desde {new Date().getFullYear()}</p>
+                </div>
+                <h2 style={{ margin: 0, fontSize: '22px' }}>{user.nome}</h2>
+                <span style={{ fontSize: '12px', color: 'var(--gray)' }}>{user.papel}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: '#f8fafc', borderRadius: '12px', marginBottom: '10px' }}>
+                <Mail size={16} color="#64748b" />
+                <span style={{ fontSize: '13px' }}>{user.email}</span>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', borderRadius: '16px' }}>
-                  <Mail size={18} color="#64748b" />
-                  <span style={{ fontSize: '14px', color: 'var(--purple)' }}>{user.email}</span>
-               </div>
-               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f8fafc', borderRadius: '16px' }}>
-                  <Shield size={18} color="#64748b" />
-                  <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--purple)' }}>{user.papel}</span>
-               </div>
+            <div className="card">
+              <h3 style={{ fontSize: '16px', color: 'var(--purple)', marginBottom: '15px' }}><Lock size={18} /> Alterar Senha</h3>
+              <form onSubmit={handleUpdatePassword}>
+                <input type="password" placeholder="Senha Atual" value={senhaAtual} onChange={e => setSenhaAtual(e.target.value)} required />
+                <input type="password" placeholder="Nova Senha" value={novaSenha} onChange={e => setNovaSenha(e.target.value)} required />
+                <input type="password" placeholder="Confirmar Nova Senha" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)} required />
+                <button className="btn-main" type="submit" style={{width: '100%', borderRadius: '12px'}}>Salvar Senha</button>
+              </form>
             </div>
           </div>
 
-          {/* COLUNA 2: MUDANÇA DE SENHA */}
-          <div className="card">
-            <h3 style={{ textAlign: 'left', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--purple)' }}>
-              <Lock size={20} /> Segurança da Conta
-            </h3>
+          {/* LADO DIREITO: MINHA AGENDA (INSCRIÇÕES) */}
+          <div style={{ textAlign: 'left' }}>
+            <h2 style={{ textAlign: 'left', fontSize: '24px', color: 'var(--purple)', marginBottom: '20px' }}>Minha Agenda</h2>
             
-            <form onSubmit={handleUpdatePassword}>
-              <div style={{ marginBottom: '15px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--gray)' }}>SENHA ATUAL</label>
-                <input 
-                  type="password" 
-                  value={senhaAtual} 
-                  onChange={e => setSenhaAtual(e.target.value)} 
-                  required 
-                />
+            {minhasInscricoes.length === 0 ? (
+              <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--gray)' }}>Você ainda não confirmou presença em nenhum evento.</p>
+                <button className="btn-secondary" onClick={() => navigate('/events')}>Explorar Eventos</button>
               </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--gray)' }}>NOVA SENHA</label>
-                  <input 
-                    type="password" 
-                    value={novaSenha} 
-                    onChange={e => setNovaSenha(e.target.value)} 
-                    required 
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--gray)' }}>CONFIRMAR SENHA</label>
-                  <input 
-                    type="password" 
-                    value={confirmarSenha} 
-                    onChange={e => setConfirmarSenha(e.target.value)} 
-                    required 
-                  />
-                </div>
+            ) : (
+              <div className="event-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                {minhasInscricoes.map(ev => (
+                  <div key={ev._id} className="card-event">
+                    <div className="card-image-wrapper">
+                      <img src={ev.foto_url || 'https://placehold.co/400x200'} alt="" />
+                      <div className="badge-category">{ev.categoria_id?.nome}</div>
+                    </div>
+                    <div className="card-content">
+                      <h3 className="event-title" style={{fontSize: '16px'}}>{ev.titulo}</h3>
+                      <div className="event-info-row"><Calendar size={14}/> {new Date(ev.data_inicio).toLocaleDateString('pt-BR')}</div>
+                      <div className="event-info-row"><MapPin size={14}/> {ev.localizacao?.nome_local}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              <button className="btn-main" type="submit" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                <Save size={20} /> Salvar Nova Senha
-              </button>
-            </form>
+            )}
           </div>
 
         </div>

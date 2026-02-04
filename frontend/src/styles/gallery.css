@@ -1,7 +1,7 @@
 
 .gallery-container {
-  width: 100vw;
-  height: 110vh;
+  width: 100%;
+  min-height: 100vh;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0px;
@@ -114,6 +114,7 @@
 
 /* Atalho para o painel */
 .admin-shortcut-card {
+  width: 50%;
   background: white;
   border: 2px solid #6b21a8;
   padding: 20px 30px;
@@ -123,6 +124,7 @@
   align-items: center;
   margin-bottom: 40px;
 }
+
 
 .admin-shortcut-card h3 { color: #6b21a8; margin: 0; }
 .admin-shortcut-card p { color: #64748b; margin: 5px 0 0 0; font-size: 14px; }

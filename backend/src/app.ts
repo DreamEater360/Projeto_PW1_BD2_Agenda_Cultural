@@ -13,6 +13,7 @@ import authRoutes from './routes/authRoutes';
 import eventoRoutes from './routes/eventoRoutes'
 import categoriaRoutes from './routes/categoriaRoutes'
 import admRoutes from './routes/admRoutes';
+import inscricaoRoutes from './routes/inscricaoRoutes';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/events', eventoRoutes)
 app.use('/api/categorias', categoriaRoutes)
 app.use('/api/adm', admRoutes)
+app.use('/api/subscriptions', inscricaoRoutes)
 
 // --- TRATAMENTO DE ERROS ---
 // Deve ser sempre o último a ser registrado
