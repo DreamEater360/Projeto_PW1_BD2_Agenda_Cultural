@@ -7,18 +7,19 @@
   --radius: 32px;
 }
 
-/* 1. Garante que o HTML e o Body ocupem a tela toda */
+/* Base da aplicação */
 html, body, #root {
   margin: 0;
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  background-color: var(--bg); /* O fundo rosado agora é global */
+  background-color: var(--bg);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
-/* Container para as telas de Login/Registro */
+/* Container para Login / Registro */
 .auth-container {
   flex: 1;
   display: flex;
@@ -27,16 +28,16 @@ html, body, #root {
   padding: 40px;
 }
 
-/* Container da Galeria - Centraliza o conteúdo no meio da página */
+/* Container principal da Galeria */
 .gallery-container {
-  width: 100vw;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
   box-sizing: border-box;
 }
 
-/* 3. Garante que o card tenha um tamanho bom mas não suma */
+/* Card base */
 .card {
   display: flex;
   flex-direction: column;
@@ -46,21 +47,43 @@ html, body, #root {
   box-shadow: 0 10px 40px rgba(0,0,0,0.05);
   padding: 40px;
   width: 100%;
-  max-width: 500px; /* Impede que o card fique largo demais em telas grandes */
+  max-width: 500px;
   box-sizing: border-box;
 }
 
-h1, h2 { color: var(--purple); text-align: center; margin-bottom: 20px; font-size: 40px; }
-p.subtitle { text-align: center; color: var(--gray); margin-bottom: 30px; font-size: 14px; }
+/* Tipografia */
+h1 {
+  color: var(--purple);
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 40px;
+}
 
-.input-group { margin-bottom: 15px; }
+h2 {
+  color: var(--purple);
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+p.subtitle {
+  text-align: center;
+  color: var(--gray);
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+/* Inputs */
+.input-group {
+  margin-bottom: 15px;
+}
 
 input {
-  color: #05051f;
+  color: var(--text);
   width: 100%;
   padding: 14px 20px;
   border-radius: 16px;
-  border: 1px solid #ffffff;
+  border: 1px solid #e5e7eb;
   background: #f8fafc;
   box-sizing: border-box;
   font-size: 16px;
@@ -68,11 +91,16 @@ input {
   margin-top: 10px;
 }
 
-input:focus { outline: none; border-color: var(--purple); background: #fff; }
+input:focus {
+  outline: none;
+  border-color: var(--purple);
+  background: #fff;
+}
 
+/* Botões */
 .btn-main {
   background: var(--purple);
-  color: rgb(255, 255, 255);
+  color: #fff;
   border: none;
   padding: 16px;
   border-radius: var(--radius);
@@ -116,6 +144,7 @@ input:focus { outline: none; border-color: var(--purple); background: #fff; }
   background-color: #e6eaed;
 }
 
+/* Seletor de papel */
 .role-selector {
   display: flex;
   background: #f1f5f9;
@@ -131,7 +160,7 @@ input:focus { outline: none; border-color: var(--purple); background: #fff; }
   border-radius: 16px;
   cursor: pointer;
   font-weight: bold;
-  color: #94a3b8;
+  color: var(--gray);
   background: transparent;
 }
 
@@ -140,7 +169,6 @@ input:focus { outline: none; border-color: var(--purple); background: #fff; }
   color: var(--purple);
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
-
 
 /* Header */
 .main-header {

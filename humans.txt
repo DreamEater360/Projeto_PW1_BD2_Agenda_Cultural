@@ -1,0 +1,15 @@
+/* TIME DE DESENVOLVIMENTO */
+Dev: Francisco Erlyson Pamplona
+Dev: Samuel Videres
+Dev: Anderson Lorran
+Localização: Sousa/Cajazeiras - PB, Brasil
+
+/* SOBRE O PROJETO */
+Nome: Agenda Cultural Local
+Tipo: Aplicação Web Fullstack
+Ano: 2025/2026
+
+/* TECNOLOGIAS */
+Frontend: React + Vite + Leaflet
+Backend: Node.js + Express
+Banco de Dados: MongoDB Atlas (Geo) + Neo4j AuraDB (Grafo)
