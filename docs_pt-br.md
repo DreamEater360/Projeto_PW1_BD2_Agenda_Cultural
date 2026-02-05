@@ -1,38 +1,39 @@
-This file is a merged representation of the entire codebase, combined into a single document by Repomix.
-The content has been processed where security check has been disabled.
+
+Este arquivo é uma representação mesclada de toda a base de código, combinada em um único documento pelo **Repomix**.
+O conteúdo foi processado com a verificação de segurança desativada.
 
 # Resumo do Arquivo
 
-## Propósito
-Este arquivo contém a representação empacotada of the todo o repositório's contents.
-It is foi projetado para ser facilmente consumido by AI systems for analysis, code review,
-or other automated processes.
+## Objetivo
+
+Este arquivo contém uma representação compactada de todo o conteúdo do repositório. Ele foi projetado para ser facilmente consumido por sistemas de **IA** para análise, revisão de código ou outros processos automatizados.
 
 ## Formato do Arquivo
+
 O conteúdo está organizado da seguinte forma:
-1. This summary section
-2. Repository information
-3. Directory structure
-4. Arquivos do repositório (if enabled)
-5. Multiple file entries, each consisting of:
-  a. A header with the file path (## File: path/to/file)
-  b. The full contents of the file in a code block
+
+1. Esta seção de resumo.
+2. Informações do repositório.
+3. Estrutura de diretórios.
+4. Arquivos do repositório (se habilitado).
+5. Múltiplas entradas de arquivos, cada uma consistindo em:
+a. Um cabeçalho com o caminho do arquivo (## File: caminho/do/arquivo).
+b. O conteúdo completo do arquivo em um bloco de código.
 
 ## Diretrizes de Uso
-- Este arquivo deve ser tratado como somente leitura. Any changes should be made to the
-  original repository files, not this packed version.
-- When processing this file, use the file path to distinguish
-  between different files in the repository.
-- Be aware that this file may contain sensitive information. Handle it with
-  the same level of security as you would the original repository.
 
-## Observações
-- Some files may have been excluded based on .gitignore rules and Repomix's configuration
-- Binary files are not included in this representação empacotada. Please refer to the Repository Structure section for a complete list of file paths, including binary files
-- Files matching patterns in .gitignore are excluded
-- Files matching default ignore patterns are excluded
-- A verificação de segurança foi desativada - content may contain sensitive information
-- Os arquivos são ordenados by Git change count (files with more changes are at the bottom)
+* Este arquivo deve ser tratado como **apenas leitura**. Quaisquer alterações devem ser feitas nos arquivos originais do repositório, não nesta versão compactada.
+* Ao processar este arquivo, use o caminho do arquivo para distinguir entre os diferentes arquivos no repositório.
+* Esteja ciente de que este arquivo pode conter informações sensíveis. Manuseie-o com o mesmo nível de segurança que você teria com o repositório original.
+
+## Notas
+
+* Alguns arquivos podem ter sido excluídos com base nas regras do `.gitignore` e na configuração do Repomix.
+* Arquivos binários não estão incluídos nesta representação. Consulte a seção de Estrutura de Diretórios para a lista completa de caminhos, incluindo arquivos binários.
+* Arquivos que coincidem com padrões do `.gitignore` foram excluídos.
+* Arquivos que coincidem com padrões de exclusão padrão foram excluídos.
+* **A verificação de segurança foi desativada** — o conteúdo pode conter informações confidenciais.
+* Os arquivos estão ordenados pela contagem de alterações no Git (arquivos com mais alterações aparecem no final).
 
 # Estrutura de Diretórios
 ```
