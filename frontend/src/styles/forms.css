@@ -1,70 +1,99 @@
+/* Container do formulário */
 .form-container {
   max-width: 800px;
-  margin: 10px auto;
+  margin: 20px auto;
   background: white;
   padding: 40px;
-  border-radius: 32px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+  border-radius: var(--radius);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.06),
+    0 2px 6px rgba(0,0,0,0.04);
 }
 
+/* Grupo de campo */
 .form-group {
-  width: 90%;
-  margin-bottom: 10px;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
-.form-group label { 
+/* Labels */
+.form-group label {
+  display: block;
   font-weight: 700;
   margin-bottom: 8px;
   color: var(--text);
   font-size: 14px;
 }
 
+/* Linhas de formulário */
 .form-row {
   display: grid;
-  width: 90%;
+  width: 100%;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
+/* Textarea */
 textarea {
   width: 100%;
-  margin-top: 10px;
-  padding: 15px;
+  margin-top: 6px;
+  padding: 14px 18px;
   border-radius: 16px;
-  border: 1px solid #eee;
+  border: 1px solid #e5e7eb;
   background: #f8fafc;
-  min-height: 120px;
+  min-height: 130px;
   font-family: inherit;
   resize: vertical;
   color: var(--text);
+  transition: 0.25s ease;
 }
 
-select, input{
-  color: var(--text);
-  margin-top: 10px;
-  width: 100%;
-  padding: 15px;
+textarea:focus {
+  outline: none;
+  border-color: var(--purple);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(107, 33, 168, 0.1);
+}
+
+/* Select e input específicos de formulário */
+select,
+.form-container input {
+  margin-top: 6px;
+  padding: 14px 18px;
   border-radius: 16px;
-  border: 1px solid #eee;
+  border: 1px solid #e5e7eb;
   background: #f8fafc;
+  color: var(--text);
   cursor: pointer;
+  transition: 0.25s ease;
 }
 
+select:focus,
+.form-container input:focus {
+  outline: none;
+  border-color: var(--purple);
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(107, 33, 168, 0.1);
+}
+
+/* Mapa */
 .map-picker-container {
   height: 300px;
   width: 100%;
   border-radius: 24px;
   overflow: hidden;
-  margin-top: 10px;
-  border: 2px solid #f1f5f9;
+  margin-top: 12px;
+  border: 1px solid #f1f5f9;
 }
 
+/* Upload de arquivo */
 .file-input-wrapper {
   background: #f8fafc;
   border: 2px dashed #e2e8f0;
-  padding: 20px;
-  border-radius: 16px;
+  padding: 24px;
+  border-radius: 18px;
   text-align: center;
+  transition: 0.25s ease;
 }
 
 .file-input-wrapper:hover {
@@ -72,10 +101,11 @@ select, input{
   background: #fdf8f9;
 }
 
+/* Input estilo link */
 .input-link {
   border: 2px solid #f1f5f9;
-  background: #fff;
-  transition: 0.3s;
+  background: #ffffff;
+  transition: 0.25s ease;
 }
 
 .input-link:focus {
@@ -83,3 +113,13 @@ select, input{
   box-shadow: 0 0 0 4px rgba(107, 33, 168, 0.1);
 }
 
+/* Responsivo */
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-container {
+    padding: 28px 24px;
+  }
+}
