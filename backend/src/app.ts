@@ -36,12 +36,48 @@ app.use('/api/subscriptions', inscricaoRoutes)
 
 // Rota de documentação
 app.get("/docs", (req, res) => {
-  const filePath = path.join(process.cwd(), "./documention/documentacao-api.md");
+  const filePath = path.join(process.cwd(), "src/documention/documentacao-api.md");
 
-  const markdown = fs.readFileSync(filePath, "utf-8");
+  // Se o arquivo não existir, retorna erro amigável
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send("Arquivo de documentação não encontrado.");
+  }
 
-  res.setHeader("Content-Type", "text/markdown");
-  res.send(markdown);
+  // Envia um HTML básico que usa o componente zero-md para renderizar o Markdown lindamente
+  res.setHeader("Content-Type", "text/html");
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+      <meta charset="UTF-8">
+      <title>API Documentation - Agenda Cultural</title>
+      <script type="module" src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"></script>
+      <style>
+        body { background: #f8fafc; margin: 0; padding: 40px; font-family: sans-serif; display: flex; justify-content: center; }
+        zero-md { 
+          background: white; 
+          padding: 40px; 
+          border-radius: 20px; 
+          box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+          max-width: 900px;
+          width: 100%;
+        }
+      </style>
+    </head>
+    <body>
+      <!-- O truque: o zero-md lê o conteúdo Markdown da rota /docs/raw -->
+      <zero-md src="/docs/raw"></zero-md>
+    </body>
+    </html>
+  `);
+});
+
+// Rota auxiliar para entregar o texto puro do Markdown para o renderizador
+app.get("/docs/raw", (req, res) => {
+  const filePath = path.join(process.cwd(), "src/documention/documentacao-api.md");
+  res.setHeader("Content-Type", "text/markdown; charset=utf-8");
+  const content = fs.readFileSync(filePath, "utf-8");
+  res.send(content);
 });
 
 // --- TRATAMENTO DE ERROS ---
