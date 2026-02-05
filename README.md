@@ -30,8 +30,7 @@ Antes de começar, você precisará ter instalado:
 
 ### 1. Clonar o Repositório
 ```bash
-git clone https://github.com/seu-usuario/Projeto_PW1_BD2_Agenda_Cultural.git
-cd Projeto_PW1_BD2_Agenda_Cultural
+git clone https://github.com/DreamEater360/Projeto_PW1_BD2_Agenda_Cultural.git
 ```
 
 ### 2. Variáveis de Ambiente (.env)
