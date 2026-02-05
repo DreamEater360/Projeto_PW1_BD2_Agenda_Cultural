@@ -61,7 +61,14 @@ O Docker subirá o backend automaticamente. O frontend deve ser iniciado manualm
 docker-compose up -d
 ```
 
-2. Entre na pasta do frontend e inicie a interface:
+2. Entre na pasta do backend e inicie o servidor:
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+3. Entre na pasta do frontend e inicie a interface:
 ```bash
 cd frontend
 npm install
