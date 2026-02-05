@@ -1,50 +1,69 @@
-h2 {
-  font-size: 30px;
-}
-
+/* Layout Principal */
 .admin-container {
-  width: 100vw;
-  height: 100vh;
-  margin: 10px auto;
-  padding: 0 20px;
+  max-width: 100%;
+  margin: 40px ;
+  padding: 20px;
+
+  min-height: 70vh;
 }
 
 .admin-grid {
   display: grid;
-  grid-template-columns: 300px 1fr;
+  width: 100%;
+  grid-template-columns: 280px 1fr;
   gap: 30px;
+  align-items: start;
 }
 
+/* Sidebar - Corrigindo a invisibilidade */
 .admin-sidebar {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid #f1f5f9;
 }
 
 .sidebar-item {
   padding: 15px 20px;
   border-radius: 16px;
   cursor: pointer;
-  font-weight: 600;
-  color: #64748b;
+  font-weight: 700;
+  color: #64748b !important; /* Força a cor cinza */
   transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
 }
 
-.sidebar-item:hover { background: #f1f5f9; }
+.sidebar-item:hover {
+  background: #f8fafc;
+  color: var(--purple) !important;
+}
+
 .sidebar-item.active {
   background: var(--purple);
-  color: white;
+  color: white !important; /* Texto branco apenas quando ativo */
 }
 
-/* Tabela de Moderação */
+/* Área de Conteúdo */
+.admin-content-area {
+  min-width: 0; /* Evita que o grid quebre com conteúdos largos */
+}
+
 .moderation-card {
   background: white;
   border-radius: 32px;
-  padding: 30px;
+  padding: 40px;
   border: 1px solid #f1f5f9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.suggestion-item {
+/* Lista de Sugestões */
+.admin-suggestion-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -52,20 +71,53 @@ h2 {
   border-bottom: 1px solid #f1f5f9;
 }
 
-.ai-report-box {
-  background: linear-gradient(135deg, #fdf4ff 0%, #faf5ff 100%);
-  border: 1px dashed var(--purple);
-  padding: 30px;
-  border-radius: 24px;
+.suggestion-info h4 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 18px;
+  text-align: left;
+}
+
+/* Stats Cards (Relatório) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
   margin-top: 20px;
-  line-height: 1.6;
 }
 
-.sparkle-icon {
-  animation: bounce 2s infinite;
+.stat-card {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e2e8f0;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+.stat-card h3 {
+  margin: 10px 0 0 0;
+  font-size: 24px;
+  color: #1e293b;
+}
+
+.stat-card small {
+  color: #94a3b8;
+  font-weight: 800;
+  font-size: 10px;
+}
+
+.empty-state {
+  padding: 60px 0;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.suggestion-actions {
+  display: flex;
+  justify-content: space-between;
 }

@@ -4,7 +4,7 @@ import api from '../services/api';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { MapPicker } from '../components/MapPicker';
-import { Search, Calendar, Clock, ImagePlus, Link as LinkIcon, Send } from 'lucide-react';
+import { Search, Calendar, Clock, Send, Loader2, MapPin } from 'lucide-react';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import '../styles/forms.css';
 
@@ -14,16 +14,17 @@ export function CreateEventPage() {
   const { city, coords: gpsCoords, loading: loadingGps } = useCurrentLocation();
   
   const [categorias, setCategorias] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
+  
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoUrlExterna, setFotoUrlExterna] = useState('');
   const [usarLinkExterno, setUsarLinkExterno] = useState(false);
+  
   const [nomeLocal, setNomeLocal] = useState('');
   const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
   const [dataInicio, setDataInicio] = useState('');
   const [horaInicio, setHoraInicio] = useState('');
-  const [dataFim, setDataFim] = useState('');
-  const [horaFim, setHoraFim] = useState('');
   
   const [formData, setFormData] = useState({
     titulo: '',
@@ -34,6 +35,7 @@ export function CreateEventPage() {
 
   const isCidadao = user?.papel === 'CIDADAO';
 
+  // Seta a localização inicial baseada no GPS do navegador
   useEffect(() => {
     if (!loadingGps && gpsCoords) {
       setCoords(gpsCoords);
@@ -45,33 +47,57 @@ export function CreateEventPage() {
     api.get('/categorias').then(res => setCategorias(res.data));
   }, []);
 
+  // --- FUNÇÃO DE BUSCA POR NOME (Reverse Geocoding) ---
   async function buscarNoMapa() {
-    if (!nomeLocal) return;
+    if (!nomeLocal.trim()) return;
+    
     setLoadingSearch(true);
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nomeLocal)}`);
+      // Usamos a API do OpenStreetMap para buscar as coordenadas pelo nome
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nomeLocal)}`
+      );
       const data = await response.json();
+
       if (data && data.length > 0) {
-        setCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        const result = data[0];
+        const newCoords = {
+          lat: parseFloat(result.lat),
+          lng: parseFloat(result.lon)
+        };
+        setCoords(newCoords);
+        // Opcional: Atualiza o nome com o endereço completo retornado pela API
+        // setNomeLocal(result.display_name); 
+      } else {
+        alert("Local não encontrado. Tente adicionar o nome da cidade (ex: Praça Matriz, Sousa).");
       }
+    } catch (error) {
+      alert("Erro ao pesquisar localização no serviço de mapas.");
     } finally {
       setLoadingSearch(false);
     }
   }
 
+  // Permite dar 'Enter' no campo de busca
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      buscarNoMapa();
+    }
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!coords) return alert("Selecione o local no mapa.");
+    if (!coords) return alert("Selecione o local no mapa!");
 
+    setLoading(true);
     try {
       const data = new FormData();
       const inicioCompleto = `${dataInicio}T${horaInicio}`;
-      const fimCompleto = dataFim && horaFim ? `${dataFim}T${horaFim}` : '';
 
       data.append('titulo', formData.titulo);
       data.append('descricao', formData.descricao);
       data.append('data_inicio', inicioCompleto);
-      if (fimCompleto) data.append('data_fim', fimCompleto);
       data.append('valor_ingresso', formData.valor_ingresso);
       data.append('categoria_id', formData.categoria_id);
       data.append('nome_local', nomeLocal);
@@ -85,16 +111,15 @@ export function CreateEventPage() {
       }
 
       await api.post('/events', data);
-
-      if (isCidadao) {
-        alert("Sugestão enviada! Ela passará por análise da prefeitura antes de aparecer na galeria. ✨");
-      } else {
-        alert("Evento publicado com sucesso! 🎭");
-      }
-      
+      alert(isCidadao ? "Sugestão enviada para análise!" : "Evento publicado!");
       navigate('/events');
     } catch (err: any) {
-      alert("Erro ao publicar. Verifique os campos.");
+      const erros = err.response?.data?.errors 
+        ? err.response.data.errors.map((e: any) => e.mensagem).join('\n')
+        : "Erro ao publicar.";
+      alert(erros);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -105,76 +130,82 @@ export function CreateEventPage() {
       <main style={{ flex: 1, padding: '40px 20px' }}>
         <div className="form-container">
           <h2 style={{ color: 'var(--purple)', textAlign: 'left', marginBottom: '30px' }}>
-            {isCidadao ? 'Sugerir Evento para a Cidade' : 'Anunciar Novo Evento'}
+            {isCidadao ? 'Sugerir Evento' : 'Anunciar Novo Evento'}
           </h2>
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>TÍTULO</label>
-              <input type="text" placeholder="Ex: Roda de Capoeira" onChange={e => setFormData({...formData, titulo: e.target.value})} required />
+              <input type="text" required minLength={3} onChange={e => setFormData({...formData, titulo: e.target.value})} />
             </div>
 
             <div className="form-group">
               <label>DESCRIÇÃO</label>
-              <textarea placeholder="Detalhes sobre o evento..." onChange={e => setFormData({...formData, descricao: e.target.value})} required />
+              <textarea required minLength={10} onChange={e => setFormData({...formData, descricao: e.target.value})} />
             </div>
 
-            <div style={{ marginBottom: '30px', background: '#f8fafc', padding: '25px', borderRadius: '24px', border: '1px solid #f1f5f9'}}>
-              <p style={{ margin: '0 0 15px 0', fontWeight: 'bold', fontSize: '14px', color: 'var(--purple)' }}>QUANDO?</p>
-              <div className="form-row">
-                <div className="form-group">
-                  <label><Calendar size={14} /> DATA</label>
-                  <input type="date" onChange={e => setDataInicio(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                  <label><Clock size={14} /> HORA</label>
-                  <input type="time" onChange={e => setHoraInicio(e.target.value)} required />
-                </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label>DATA</label>
+                <input type="date" required onChange={e => setDataInicio(e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>HORA</label>
+                <input type="time" required onChange={e => setHoraInicio(e.target.value)} />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label>CATEGORIA</label>
-                <select onChange={e => setFormData({...formData, categoria_id: e.target.value})} required>
+                <select required onChange={e => setFormData({...formData, categoria_id: e.target.value})}>
                   <option value="">Selecione...</option>
                   {categorias.map(cat => <option key={cat._id} value={cat._id}>{cat.nome}</option>)}
                 </select>
               </div>
               <div className="form-group">
-                <label>VALOR DO INGRESSO</label>
-                <input type="number" step="0.01" placeholder="0.00" onChange={e => setFormData({...formData, valor_ingresso: e.target.value})} />
+                <label>VALOR (R$)</label>
+                <input type="number" step="0.01" min="0" onChange={e => setFormData({...formData, valor_ingresso: e.target.value})} />
               </div>
             </div>
 
+            {/* SEÇÃO DE LOCALIZAÇÃO REFORMULADA */}
             <div className="form-group">
-              <label>IMAGEM</label>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-                <button type="button" className={`role-btn ${!usarLinkExterno ? 'active' : ''}`} onClick={() => setUsarLinkExterno(false)}>Upload</button>
-                <button type="button" className={`role-btn ${usarLinkExterno ? 'active' : ''}`} onClick={() => setUsarLinkExterno(true)}>Link</button>
-              </div>
-              {usarLinkExterno ? (
-                <input type="url" placeholder="https://..." value={fotoUrlExterna} onChange={e => setFotoUrlExterna(e.target.value)} />
-              ) : (
-                <input type="file" accept="image/*" onChange={e => setFoto(e.target.files![0])} />
-              )}
-            </div>
-
-            <div className="form-group">
-              <label>LOCALIZAÇÃO</label>
+              <label>ONDE VAI SER? (NOME DO LOCAL)</label>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                <input type="text" value={nomeLocal} onChange={e => setNomeLocal(e.target.value)} required />
-                <button type="button" onClick={buscarNoMapa} className="btn-purple" style={{ width: '60px' }}>
-                   {loadingSearch ? '...' : <Search size={20} />}
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <MapPin size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                  <input 
+                    type="text" 
+                    placeholder="Ex: Praça do Coreto, Cajazeiras" 
+                    style={{ paddingLeft: '45px' }}
+                    value={nomeLocal} 
+                    required
+                    onKeyDown={handleKeyPress}
+                    onChange={e => setNomeLocal(e.target.value)} 
+                  />
+                </div>
+                <button 
+                  type="button" 
+                  onClick={buscarNoMapa} 
+                  disabled={loadingSearch}
+                  className="btn-purple" 
+                  style={{ width: '60px',marginTop: '10px', borderRadius: '16px', display: 'flex', justifyContent: 'base-line', alignItems: 'center' }}
+                >
+                   {loadingSearch ? <Loader2 className="spinner" size={20} /> : <Search size={20} />}
                 </button>
               </div>
+
               <div className="map-picker-container">
                 <MapPicker targetCoords={coords} onLocationSelect={(lat, lng) => setCoords({ lat, lng })} />
               </div>
+              <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px', textAlign: 'left' }}>
+                💡 <b>Dica:</b> Digite o nome do local e clique na lupa. Você também pode clicar diretamente no mapa para ajustar o ponto.
+              </p>
             </div>
 
-            <button className="btn-main" type="submit" style={{marginTop: '40px'}}>
-              {isCidadao ? <><Send size={18}/> Enviar Sugestão</> : 'Publicar Evento'}
+            <button className="btn-main" type="submit" disabled={loading} style={{ marginTop: '30px' }}>
+              {loading ? <Loader2 className="spinner" /> : <><Send size={18}/> {isCidadao ? 'Enviar Sugestão' : 'Publicar Evento'}</>}
             </button>
           </form>
         </div>

@@ -5,7 +5,7 @@ import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { User, Mail, Shield, Lock, Save, ArrowLeft, Calendar, MapPin } from 'lucide-react';
 import '../styles/global.css';
-import '../styles/gallery.css'; // Reutilizar o CSS dos cards
+import '../styles/gallery.css';
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ export function ProfilePage() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: '#f8fafc', borderRadius: '12px', marginBottom: '10px' }}>
                 <Mail size={16} color="#64748b" />
-                <span style={{ fontSize: '13px' }}>{user.email}</span>
+                <span style={{ fontSize: '13px', color: 'var(--text)' }}>{user.email}</span>
               </div>
             </div>
 
@@ -78,9 +78,10 @@ export function ProfilePage() {
 
           {/* LADO DIREITO: MINHA AGENDA (INSCRIÇÕES) */}
           <div style={{ textAlign: 'left' }}>
-            <h2 style={{ textAlign: 'left', fontSize: '24px', color: 'var(--purple)', marginBottom: '20px' }}>Minha Agenda</h2>
+            <h2 style={{ textAlign: 'left', fontSize: '24px', color: 'var(--purple)', marginBottom: '10px', marginTop: '0' }}>Minha Agenda</h2>
             
             {minhasInscricoes.length === 0 ? (
+              
               <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
                 <p style={{ color: 'var(--gray)' }}>Você ainda não confirmou presença em nenhum evento.</p>
                 <button className="btn-secondary" onClick={() => navigate('/events')}>Explorar Eventos</button>
@@ -90,7 +91,7 @@ export function ProfilePage() {
                 {minhasInscricoes.map(ev => (
                   <div key={ev._id} className="card-event">
                     <div className="card-image-wrapper">
-                      <img src={ev.foto_url || 'https://placehold.co/400x200'} alt="" />
+                      <img src={ev.foto_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'} alt="" />
                       <div className="badge-category">{ev.categoria_id?.nome}</div>
                     </div>
                     <div className="card-content">

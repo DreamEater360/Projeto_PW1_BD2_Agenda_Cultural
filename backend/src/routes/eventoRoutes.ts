@@ -15,5 +15,7 @@ router.get('/:id', eventoController.show);
 // 3. OUTRAS
 router.post('/', authMiddleware, upload.single('foto'), eventoController.store);
 router.patch('/:id/toggle', authMiddleware, eventoController.toggleStatus);
+router.patch('/:id', authMiddleware, upload.single('foto'), eventoController.update);
+router.delete('/:id', authMiddleware, eventoController.destroy);
 
 export default router;

@@ -4,22 +4,30 @@ import { EventoModel } from '../models/Evento';
 import { neo4jDriver } from '../config/neo4j';
 import { BadRequestError, NotFoundError, ForbiddenError, ApiError } from '../errors/apiError';
 
-const createEventoSchema = z.object({
-  titulo: z.string().min(3).max(100),
-  descricao: z.string().min(10).max(2000),
+// SCHEMA ÚNICO DE VALIDAÇÃO (Reutilizável)
+const eventoSchema = z.object({
+  titulo: z.string()
+    .min(3, "O título deve ter pelo menos 3 caracteres")
+    .max(100, "Título muito longo"),
+  descricao: z.string()
+    .min(10, "A descrição deve ter pelo menos 10 caracteres")
+    .max(2000, "Descrição muito longa"),
   data_inicio: z.string().transform((val) => new Date(val)),
   data_fim: z.string().optional().transform((val) => val ? new Date(val) : undefined),
-  valor_ingresso: z.string().default('0').transform((val) => parseFloat(val)),
-  categoria_id: z.string().min(1),
-  nome_local: z.string().min(2),
-  longitude: z.string().transform((val) => parseFloat(val)),
-  latitude: z.string().transform((val) => parseFloat(val)),
+  valor_ingresso: z.any().transform((val) => {
+    const parsed = typeof val === 'string' ? parseFloat(val) : val;
+    return isNaN(parsed) ? 0 : parsed;
+  }),
+  categoria_id: z.string().min(1, "Selecione uma categoria"),
+  nome_local: z.string().min(2, "Informe o nome do local"),
+  longitude: z.any().transform((val) => parseFloat(val)),
+  latitude: z.any().transform((val) => parseFloat(val)),
 });
 
 export const create = async (data: unknown, usuario: { id: string, papel: string }, foto_url?: string) => {
-  const validatedData = createEventoSchema.parse(data);
+  // O .parse() joga um erro se os dados forem inválidos, que o errorMiddleware captura
+  const validatedData = eventoSchema.parse(data);
 
-  // REGRA DE NEGÓCIO: Só Organizador e Admin publicam direto. Cidadão cria como PENDENTE.
   const statusInicial = (usuario.papel === 'ORGANIZADOR' || usuario.papel === 'ADMINISTRADOR') 
     ? 'APROVADO' 
     : 'PENDENTE';
@@ -41,12 +49,13 @@ export const create = async (data: unknown, usuario: { id: string, papel: string
     }
   });
 
+  // Persistência Poliglota (Neo4j)
   const session = neo4jDriver.session();
   try {
     await session.run(
-      `MATCH (u:Usuario {mongoId: $uId})
-       CREATE (e:Evento {mongoId: $eId, titulo: $titulo, data: $data})
-       CREATE (u)-[:ANUNCIOU {em: datetime()}]->(e)`,
+      `MATCH (u:Usuario {mongoId: $uId}) 
+       CREATE (e:Evento {mongoId: $eId, titulo: $titulo, data: $data}) 
+       CREATE (u)-[:ANUNCIOU]->(e)`,
       {
         uId: usuario.id,
         eId: evento._id.toString(),
@@ -55,12 +64,33 @@ export const create = async (data: unknown, usuario: { id: string, papel: string
       }
     );
   } catch (error) {
-    await EventoModel.findByIdAndDelete(evento._id);
-    throw new ApiError('Erro de sincronização poliglota.', 500);
+    console.error("Erro Neo4j:", error);
   } finally {
     await session.close();
   }
 
+  return evento;
+};
+
+export const update = async (eventoId: string, userId: string, data: any) => {
+  const partialSchema = eventoSchema.partial();
+  const validatedData = partialSchema.parse(data);
+
+  const evento = await EventoModel.findById(eventoId);
+  if (!evento) throw new NotFoundError('Evento não encontrado.');
+  if (evento.organizador_id.toString() !== userId) throw new ForbiddenError('Sem permissão.');
+
+  Object.assign(evento, validatedData);
+
+  if (data.latitude && data.longitude) {
+    evento.localizacao = {
+      type: 'Point',
+      coordinates: [parseFloat(data.longitude), parseFloat(data.latitude)],
+      nome_local: data.nome_local || (evento.localizacao as any).nome_local
+    };
+  }
+
+  await evento.save();
   return evento;
 };
 
@@ -90,4 +120,33 @@ export const toggleVisibility = async (eventoId: string, userId: string, userRol
   evento.status = evento.status === 'APROVADO' ? 'CANCELADO' : 'APROVADO';
   await evento.save();
   return evento;
+};
+
+export const remove = async (eventoId: string, userId: string) => {
+  // 1. Verificar se o evento existe e pertence ao organizador
+  const evento = await EventoModel.findById(eventoId);
+  
+  if (!evento) throw new NotFoundError('Evento não encontrado.');
+  
+  if (evento.organizador_id.toString() !== userId) {
+    throw new ForbiddenError('Você não tem permissão para excluir este evento.');
+  }
+
+  // 2. Deletar do MongoDB
+  await EventoModel.findByIdAndDelete(eventoId);
+
+  // 3. Deletar do Neo4j (Persistência Poliglota)
+  const session = neo4jDriver.session();
+  try {
+    await session.run(
+      'MATCH (e:Evento {mongoId: $id}) DETACH DELETE e',
+      { id: eventoId }
+    );
+  } catch (error) {
+    console.error("⚠️ [NEO4J]: Erro ao remover nó do evento:", error);
+  } finally {
+    await session.close();
+  }
+
+  return { message: "Evento removido com sucesso." };
 };
