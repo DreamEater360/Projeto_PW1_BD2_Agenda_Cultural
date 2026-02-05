@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
 // Importação das conexões e middlewares
 import { connectMongo } from './config/mongo';
@@ -14,6 +15,7 @@ import eventoRoutes from './routes/eventoRoutes'
 import categoriaRoutes from './routes/categoriaRoutes'
 import admRoutes from './routes/admRoutes';
 import inscricaoRoutes from './routes/inscricaoRoutes';
+
 
 dotenv.config();
 
@@ -31,6 +33,16 @@ app.use('/api/events', eventoRoutes)
 app.use('/api/categorias', categoriaRoutes)
 app.use('/api/adm', admRoutes)
 app.use('/api/subscriptions', inscricaoRoutes)
+
+// Rota de documentação
+app.get("/docs", (req, res) => {
+  const filePath = path.join(process.cwd(), "./documention/documentacao-api.md");
+
+  const markdown = fs.readFileSync(filePath, "utf-8");
+
+  res.setHeader("Content-Type", "text/markdown");
+  res.send(markdown);
+});
 
 // --- TRATAMENTO DE ERROS ---
 // Deve ser sempre o último a ser registrado
