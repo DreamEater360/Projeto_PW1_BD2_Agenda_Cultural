@@ -56,7 +56,7 @@ NEO4J_PASSWORD=sua_senha_do_neo4j
 
 O Docker subirá o backend automaticamente. O frontend deve ser iniciado manualmente para facilitar o desenvolvimento.
 
-1. Na raiz do projeto, suba o container do backend:
+1. Dentro do diretorio backend, suba o container do backend:
 ```bash
 docker-compose up -d
 ```
@@ -78,20 +78,6 @@ npm run dev
 O sistema estará disponível em:
 - **Frontend:** `http://localhost:5173`
 - **Backend (API):** `http://localhost:3333`
-
----
-
-## 💻 Rodando Manualmente (Sem Docker)
-
-### Backend
-1. Abra um terminal na pasta `backend/`.
-2. Instale as dependências: `npm install`.
-3. Inicie o servidor: `npm run dev`.
-
-### Frontend
-1. Abra um terminal na pasta `frontend/`.
-2. Instale as dependências: `npm install`.
-3. Inicie a aplicação: `npm run dev`.
 
 ---
 
