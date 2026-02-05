@@ -1,9 +1,3 @@
-Aqui está um guia completo e profissional para o seu repositório. Ele explica desde a configuração dos bancos de dados na nuvem até a execução via Docker ou manualmente.
-
-Substitua o conteúdo do arquivo `README.md` na raiz do projeto por este:
-
----
-
 # 🎭 Agenda Cultural Local
 
 Este projeto é uma aplicação web completa para gestão de eventos culturais, desenvolvida para as disciplinas de **Programação Web 1** e **Banco de Dados 2** (ADS - IFPB). A plataforma permite que cidadãos sugiram eventos, organizadores publiquem atividades e gestores públicos moderem o conteúdo e visualizem relatórios estatísticos.
