@@ -13,25 +13,22 @@ import {
   Eye, 
   FileText, 
   AlertCircle,
-  Loader2
+  Loader2,
+  Users,
+  CalendarCheck
 } from 'lucide-react';
 import '../styles/admin.css';
 
 export function AdminPage() {
   const [tab, setTab] = useState<'moderacao' | 'relatorios'>('moderacao');
   const [sugestoes, setSugestoes] = useState<any[]>([]);
-  const [relatorioIA, setRelatorioIA] = useState<string>('');
+  const [relatorioData, setRelatorioData] = useState<any>(null);
   const [loadingIA, setLoadingIA] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
-  
-  // Estado para visualização de detalhes
   const [eventoSelecionado, setEventoSelecionado] = useState<any>(null);
 
-  // Buscar dados de moderação
   useEffect(() => {
-    if (tab === 'moderacao') {
-      fetchSuggestions();
-    }
+    if (tab === 'moderacao') fetchSuggestions();
   }, [tab]);
 
   async function fetchSuggestions() {
@@ -40,44 +37,31 @@ export function AdminPage() {
       const res = await api.get('/adm/sugestoes');
       setSugestoes(res.data);
     } catch (err) {
-      console.error("Erro ao buscar sugestões:", err);
+      console.error(err);
     } finally {
       setLoadingData(false);
     }
   }
 
-  // Aprovar ou Rejeitar
   async function handleModeration(id: string, status: 'APROVADO' | 'REJEITADO') {
     try {
       await api.patch(`/adm/sugestoes/${id}/status`, { status });
       setSugestoes(prev => prev.filter(s => s._id !== id));
-      
-      const msg = status === 'APROVADO' 
-        ? "Evento aprovado! Ele já está visível na galeria pública." 
-        : "Sugestão rejeitada com sucesso.";
-      alert(msg);
+      alert(status === 'APROVADO' ? "Evento publicado!" : "Sugestão rejeitada.");
     } catch (err) {
-      alert("Erro ao processar a moderação.");
+      alert("Erro na moderação.");
     }
   }
 
-  // Chamar o Google Gemini
-  async function gerarImpactoIA() {
+  async function gerarRelatorioEstatistico() {
     setLoadingIA(true);
-    setRelatorioIA('');
     try {
       const response = await api.post('/adm/relatorios/gerar', { 
         tipo: "Análise de Impacto Cultural" 
       });
-      
-      if (response.data?.dados?.analise_ia) {
-        setRelatorioIA(response.data.dados.analise_ia);
-      } else {
-        alert("A IA gerou o relatório, mas o conteúdo veio vazio.");
-      }
+      setRelatorioData(response.data.dados);
     } catch (err: any) {
-      const erroMsg = err.response?.data?.message || "Falha ao consultar a Inteligência Artificial.";
-      alert(erroMsg);
+      alert("Falha ao processar dados do sistema.");
     } finally {
       setLoadingIA(false);
     }
@@ -90,44 +74,32 @@ export function AdminPage() {
       <main className="admin-container" style={{ flex: 1, padding: '40px 20px' }}>
         <div className="admin-grid">
           
-          {/* MENU LATERAL (SIDEBAR) */}
           <aside className="admin-sidebar">
-            <div 
-              className={`sidebar-item ${tab === 'moderacao' ? 'active' : ''}`} 
-              onClick={() => setTab('moderacao')}
-            >
+            <div className={`sidebar-item ${tab === 'moderacao' ? 'active' : ''}`} onClick={() => setTab('moderacao')}>
               <LayoutDashboard size={20} /> Moderação
             </div>
-            <div 
-              className={`sidebar-item ${tab === 'relatorios' ? 'active' : ''}`} 
-              onClick={() => setTab('relatorios')}
-            >
-              <Sparkles size={20} /> Relatórios IA
+            <div className={`sidebar-item ${tab === 'relatorios' ? 'active' : ''}`} onClick={() => setTab('relatorios')}>
+              <FileText size={20} /> Relatórios
             </div>
           </aside>
 
-          {/* ÁREA DE CONTEÚDO */}
           <section className="admin-content-area">
             
-            {/* ABA DE MODERAÇÃO */}
             {tab === 'moderacao' && (
               <div className="moderation-card">
                 <div style={{ textAlign: 'left', marginBottom: '30px' }}>
                   <h2 style={{ margin: 0, fontSize: '28px', color: '#1e293b' }}>Moderação de Eventos</h2>
-                  <p style={{ color: '#64748b', marginTop: '5px' }}>
-                    Valide as propostas enviadas pelos cidadãos antes de publicá-las oficialmente.
-                  </p>
+                  <p style={{ color: '#64748b', marginTop: '5px' }}>Valide as propostas enviadas pelos cidadãos.</p>
                 </div>
 
                 {loadingData ? (
                   <div style={{ padding: '40px', textAlign: 'center' }}>
                     <Loader2 className="spinner" size={40} color="var(--purple)" />
-                    <p style={{ color: '#64748b', marginTop: '10px' }}>Carregando pendências...</p>
                   </div>
                 ) : sugestoes.length === 0 ? (
                   <div className="empty-state">
                     <AlertCircle size={48} color="#cbd5e1" />
-                    <p>Não há eventos aguardando aprovação no momento.</p>
+                    <p>Sem pendências no momento.</p>
                   </div>
                 ) : (
                   <div className="suggestions-list">
@@ -138,37 +110,12 @@ export function AdminPage() {
                           <div className="suggestion-meta">
                             <span><MapPin size={14} /> {s.localizacao?.nome_local}</span>
                             <span><Tag size={14} /> {s.categoria_id?.nome}</span>
-                            <span>Sugerido por: <b>{s.organizador_id?.nome}</b></span>
                           </div>
                         </div>
-
                         <div className="suggestion-actions">
-                          {/* BOTÃO VER DETALHES (OLHINHO) */}
-                          <button 
-                            className="btn-icon view" 
-                            onClick={() => setEventoSelecionado(s)}
-                            title="Ver detalhes completos"
-                          >
-                            <Eye size={20} />
-                          </button>
-
-                          {/* BOTÃO APROVAR */}
-                          <button 
-                            className="btn-icon approve" 
-                            onClick={() => handleModeration(s._id, 'APROVADO')}
-                            title="Aprovar e Publicar"
-                          >
-                            <Check size={20} />
-                          </button>
-
-                          {/* BOTÃO REJEITAR */}
-                          <button 
-                            className="btn-icon reject" 
-                            onClick={() => handleModeration(s._id, 'REJEITADO')}
-                            title="Rejeitar Sugestão"
-                          >
-                            <X size={20} />
-                          </button>
+                          <button className="btn-icon view" onClick={() => setEventoSelecionado(s)}><Eye size={20} /></button>
+                          <button className="btn-icon approve" onClick={() => handleModeration(s._id, 'APROVADO')}><Check size={20} /></button>
+                          <button className="btn-icon reject" onClick={() => handleModeration(s._id, 'REJEITADO')}><X size={20} /></button>
                         </div>
                       </div>
                     ))}
@@ -177,43 +124,43 @@ export function AdminPage() {
               </div>
             )}
 
-            {/* ABA DE RELATÓRIOS IA */}
             {tab === 'relatorios' && (
               <div className="moderation-card">
                 <div style={{ textAlign: 'left', marginBottom: '30px' }}>
-                  <h2 style={{ margin: 0, fontSize: '28px', color: '#1e293b' }}>Relatórios de Impacto (IA)</h2>
-                  <p style={{ color: '#64748b', marginTop: '5px' }}>
-                    Gere análises estratégicas sobre o cenário cultural da cidade usando o Google Gemini.
-                  </p>
+                  <h2 style={{ margin: 0, fontSize: '28px', color: '#1e293b' }}>Dados do Sistema</h2>
+                  <p style={{ color: '#64748b', marginTop: '5px' }}>Indicadores reais de engajamento e eventos.</p>
                 </div>
 
-                <div className="ai-controls">
-                  <button 
-                    className="btn-main" 
-                    onClick={gerarImpactoIA} 
-                    disabled={loadingIA}
-                    style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: '10px', padding: '15px 30px' }}
-                  >
-                    {loadingIA ? (
-                      <><Loader2 className="spinner" size={20} /> Analisando Dados...</>
-                    ) : (
-                      <><Sparkles size={20} /> Gerar Análise com Gemini ✨</>
-                    )}
-                  </button>
-                </div>
+                <button className="btn-main" onClick={gerarRelatorioEstatistico} disabled={loadingIA} style={{ width: 'auto', padding: '15px 30px' }}>
+                  {loadingIA ? <><Loader2 className="spinner" size={20} /> Coletando...</> : "Gerar Relatório Atualizado"}
+                </button>
 
-                {relatorioIA && (
-                  <div className="ai-result-container">
-                    <div className="ai-header">
-                      <FileText size={20} />
-                      <span>Relatório Gerado em {new Date().toLocaleDateString('pt-BR')}</span>
+                {relatorioData && (
+                  <div style={{ marginTop: '30px' }}>
+                    <div className="stats-grid">
+                      <div className="stat-card">
+                        <Users size={20} color="var(--purple)" />
+                        <small>USUÁRIOS</small>
+                        <h3>{relatorioData.estatisticas.totalUsuarios}</h3>
+                      </div>
+                      <div className="stat-card">
+                        <CalendarCheck size={20} color="var(--purple)" />
+                        <small>EVENTOS</small>
+                        <h3>{relatorioData.estatisticas.totalEventos}</h3>
+                      </div>
+                      <div className="stat-card">
+                        <Check size={20} color="#22c55e" />
+                        <small>APROVADOS</small>
+                        <h3 style={{color: '#22c55e'}}>{relatorioData.estatisticas.aprovados}</h3>
+                      </div>
+                      <div className="stat-card">
+                        <AlertCircle size={20} color="#f59e0b" />
+                        <small>PENDENTES</small>
+                        <h3 style={{color: '#f59e0b'}}>{relatorioData.estatisticas.pendentes}</h3>
+                      </div>
                     </div>
-                    <div className="ai-body">
-                      <p>{relatorioIA}</p>
-                    </div>
-                    <div className="ai-footer">
-                      <Sparkles size={14} /> Powered by Google Gemini 1.5 Flash
-                    </div>
+
+                    
                   </div>
                 )}
               </div>
@@ -221,16 +168,8 @@ export function AdminPage() {
           </section>
         </div>
       </main>
-
       <Footer />
-
-      {/* Modal de Detalhes para o Admin revisar antes de aprovar */}
-      {eventoSelecionado && (
-        <EventModal 
-          evento={eventoSelecionado} 
-          onClose={() => setEventoSelecionado(null)} 
-        />
-      )}
+      {eventoSelecionado && <EventModal evento={eventoSelecionado} onClose={() => setEventoSelecionado(null)} />}
     </div>
   );
 }

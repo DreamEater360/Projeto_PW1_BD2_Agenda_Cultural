@@ -38,3 +38,19 @@ export const show = async (req: Request, res: Response) => {
   const evento = await eventoService.getById(eventId!);
   return res.json(evento);
 };
+
+export const update = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const eventId = Array.isArray(id) ? id[0] : id;
+  const userId = req.user!.id;
+  const evento = await eventoService.update(eventId, userId, req.body);
+  return res.json(evento);
+};
+
+export const destroy = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const eventId = Array.isArray(id) ? id[0] : id;
+  const userId = req.user!.id;
+  const resultado = await eventoService.remove(eventId, userId);
+  return res.json(resultado);
+};

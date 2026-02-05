@@ -6,27 +6,39 @@ import { neo4jDriver } from '../config/neo4j';
 import { BadRequestError, UnauthorizedError, NotFoundError, ApiError } from '../errors/apiError';
 
 const registerSchema = z.object({
-  nome: z.string().min(3),
-  email: z.string().email(),
-  senha: z.string().min(6),
+  nome: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
+  email: z.string().email("E-mail inválido"),
+  senha: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   papel: z.string(),
   cnpj: z.string().optional(),
   razao_social: z.string().optional(),
+}).refine((data) => {
+  // REGRA: Se for Organizador, o CNPJ tem que existir e ter pelo menos 14 caracteres
+  if (data.papel === 'ORGANIZADOR') {
+    return data.cnpj && data.cnpj.replace(/\D/g, '').length === 14;
+  }
+  return true;
+}, {
+  message: "Para organizadores, o CNPJ deve ter 14 números",
+  path: ["cnpj"] // O erro será focado no campo CNPJ
 });
 
 export const register = async (data: unknown) => {
+  // O .parse() agora vai barrar CNPJs inválidos para Organizadores
   const validatedData = registerSchema.parse(data);
 
   const exists = await UsuarioModel.findOne({ email: validatedData.email });
   if (exists) throw new BadRequestError('E-mail já cadastrado.');
 
   const senha_hash = await bcrypt.hash(validatedData.senha, 10);
+  
+  // Removemos a senha do objeto antes de salvar
   const { senha, ...rest } = validatedData;
 
-  // 1. Persistência no MongoDB
+  // Criamos no MongoDB
   const usuario = await UsuarioModel.create({ ...rest, senha_hash });
 
-  // 2. Persistência no Neo4j com Lógica de Rollback
+  // Sincronização Neo4j
   const session = neo4jDriver.session();
   try {
     await session.run(
@@ -34,10 +46,8 @@ export const register = async (data: unknown) => {
       { id: usuario._id.toString(), nome: usuario.nome, papel: usuario.papel }
     );
   } catch (error) {
-    // ROLLBACK: Se o Neo4j falhar, removemos do MongoDB para manter a consistência
     await UsuarioModel.findByIdAndDelete(usuario._id);
-    console.error("❌ Erro Neo4j - Cadastro desfeito no MongoDB:", error);
-    throw new ApiError('Falha na integridade dos bancos (Neo4j). Tente novamente.', 500);
+    throw new ApiError('Falha na sincronização poliglota.', 500);
   } finally {
     await session.close();
   }
@@ -47,10 +57,14 @@ export const register = async (data: unknown) => {
 
 export const login = async (data: any) => {
   const { email, senha } = data;
+  
+  // 1. Busca usuário
   const usuario = await UsuarioModel.findOne({ email });
 
+  // 2. Se não existe ou a senha não bate, lança o erro
+  // O catchAsync no controller vai pegar esse throw e mandar pro errorMiddleware
   if (!usuario || !(await bcrypt.compare(senha, usuario.senha_hash))) {
-    throw new UnauthorizedError('Credenciais inválidas.');
+    throw new UnauthorizedError('E-mail ou senha incorretos.');
   }
 
   const token = jwt.sign(

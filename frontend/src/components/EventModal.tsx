@@ -40,9 +40,6 @@ export function EventModal({ evento, onClose }: EventModalProps) {
       <div className="modal-content" onClick={e => e.stopPropagation()}>
         
         {/* Botão de fechar sobre a foto */}
-        <button className="modal-close-btn" onClick={onClose} title="Fechar">
-          <X size={20} />
-        </button>
         
         <img 
           src={evento.foto_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=500&q=80'} 
@@ -90,9 +87,7 @@ export function EventModal({ evento, onClose }: EventModalProps) {
               <button className="interest-btn" onClick={handleInscricao} disabled={loading}>
                 {loading ? 'Processando...' : 'Confirmar Presença'}
               </button>
-              <button className="modal-fav-btn" style={{padding: '10px', background: '#f1f5f9', borderRadius: '12px', border: 'none', cursor: 'pointer'}}>
-                <Heart size={24} color="#64748b" />
-              </button>
+              
             </div>
           ) : (
             <div style={{ marginTop: '20px', padding: '15px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '16px', textAlign: 'center' }}>
