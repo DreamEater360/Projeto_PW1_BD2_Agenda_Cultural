@@ -1,0 +1,63 @@
+:root {
+  --brand-purple: #6b21a8;
+  --bg-light: #fdf8f9;
+  --text-dark: #05051f;
+  --radius: 32px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Estilo para Cards e Containers Brancos */
+.card-base {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  padding: 30px;
+}
+
+/* Inputs arredondados */
+input {
+  width: 100%;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 16px;
+  border: 1px solid #eee;
+  background: #f9f9f9;
+  box-sizing: border-box;
+}
+
+/* Botão Roxo Arredondado */
+.btn-primary {
+  background: var(--brand-purple);
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-ghost {
+  background: #eee;
+  color: #666;
+  border-radius: var(--radius);
+  padding: 15px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+}
