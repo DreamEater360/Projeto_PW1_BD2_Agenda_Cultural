@@ -5,14 +5,11 @@ import { upload } from '../config/multer';
 
 const router = Router();
 
-// 1. ROTAS FIXAS (Sempre primeiro)
 router.get('/', eventoController.index);
-router.get('/mine', authMiddleware, eventoController.indexByOrganizer); // <--- DEVE ESTAR AQUI
+router.get('/mine', authMiddleware, eventoController.indexByOrganizer);
 
-// 2. ROTAS DINÂMICAS (Sempre por último)
 router.get('/:id', eventoController.show);
 
-// 3. OUTRAS
 router.post('/', authMiddleware, upload.single('foto'), eventoController.store);
 router.patch('/:id/toggle', authMiddleware, eventoController.toggleStatus);
 router.patch('/:id', authMiddleware, upload.single('foto'), eventoController.update);

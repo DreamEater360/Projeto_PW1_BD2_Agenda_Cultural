@@ -13,7 +13,7 @@ router.use(roleMiddleware(['ADMINISTRADOR', 'GESTOR_PUBLICO']));
 router.get('/sugestoes', admController.getSuggestions);
 router.patch('/sugestoes/:id/status', admController.updateSuggestion);
 
-// Rotas de Relatório IA
+// Rotas de Relatório 
 router.post('/relatorios/gerar', admController.createReport);
 
 export default router;

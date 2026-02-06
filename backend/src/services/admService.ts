@@ -18,10 +18,9 @@ export const updateSuggestionStatus = async (id: string, data: any) => {
   return evento;
 };
 
-// --- GERAR RELATÓRIO ESTATÍSTICO (Substituiu a IA) ---
+// GERAR RELATÓRIO ESTATÍSTICO 
 export const generateAIReport = async (tipo: string, autorId: string) => {
   try {
-    // Coleta dados reais do banco de dados de forma paralela
     const [
       totalEventos, 
       totalUsuarios, 
@@ -38,7 +37,6 @@ export const generateAIReport = async (tipo: string, autorId: string) => {
       CategoriaModel.find({}, 'nome')
     ]);
 
-    // Salva o snapshot dos dados no banco (requisito de histórico de relatórios)
     const relatorio = await RelatorioModel.create({
       tipo: tipo || "Relatório Estatístico de Gestão",
       autor: autorId,

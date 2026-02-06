@@ -8,7 +8,6 @@ export class ApiError extends Error {
   }
 }
 
-// Erros específicos que podemos reutilizar
 export class NotFoundError extends ApiError {
   constructor(message: string) {
     super(message, 404)

@@ -27,7 +27,6 @@ app.use(express.json());
 app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 // --- ROTAS ---
-// Endpoint de Autenticação
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventoRoutes)
 app.use('/api/categorias', categoriaRoutes)
@@ -37,13 +36,10 @@ app.use('/api/subscriptions', inscricaoRoutes)
 // Rota de documentação
 app.get("/docs", (req, res) => {
   const filePath = path.join(process.cwd(), "src/documention/documentacao-api.md");
-
-  // Se o arquivo não existir, retorna erro amigável
   if (!fs.existsSync(filePath)) {
     return res.status(404).send("Arquivo de documentação não encontrado.");
   }
 
-  // Envia um HTML básico que usa o componente zero-md para renderizar o Markdown lindamente
   res.setHeader("Content-Type", "text/html");
   res.send(`
     <!DOCTYPE html>
@@ -81,13 +77,11 @@ app.get("/docs/raw", (req, res) => {
 });
 
 // --- TRATAMENTO DE ERROS ---
-// Deve ser sempre o último a ser registrado
 app.use(errorMiddleware);
 
 // --- INICIALIZAÇÃO ---
 const start = async () => {
   try {
-    // Garante a conexão com os dois bancos antes de abrir a porta
     await connectMongo();
     await connectNeo4j();
 

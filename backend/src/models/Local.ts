@@ -15,13 +15,12 @@ const LocalSchema = new Schema({
       required: true
     },
     coordinates: {
-      type: [Number], // [longitude, latitude]
+      type: [Number],
       required: true
     }
   }
 }, { timestamps: true });
 
-// Índice para buscas no Leaflet
 LocalSchema.index({ location: '2dsphere' });
 
 export const LocalModel = model('Local', LocalSchema);

@@ -13,26 +13,22 @@ const registerSchema = z.object({
   cnpj: z.string().optional(),
   razao_social: z.string().optional(),
 }).refine((data) => {
-  // REGRA: Se for Organizador, o CNPJ tem que existir e ter pelo menos 14 caracteres
   if (data.papel === 'ORGANIZADOR') {
     return data.cnpj && data.cnpj.replace(/\D/g, '').length === 14;
   }
   return true;
 }, {
   message: "Para organizadores, o CNPJ deve ter 14 números",
-  path: ["cnpj"] // O erro será focado no campo CNPJ
+  path: ["cnpj"] 
 });
 
 export const register = async (data: unknown) => {
-  // O .parse() agora vai barrar CNPJs inválidos para Organizadores
   const validatedData = registerSchema.parse(data);
 
   const exists = await UsuarioModel.findOne({ email: validatedData.email });
   if (exists) throw new BadRequestError('E-mail já cadastrado.');
 
   const senha_hash = await bcrypt.hash(validatedData.senha, 10);
-  
-  // Removemos a senha do objeto antes de salvar
   const { senha, ...rest } = validatedData;
 
   // Criamos no MongoDB
@@ -58,11 +54,8 @@ export const register = async (data: unknown) => {
 export const login = async (data: any) => {
   const { email, senha } = data;
   
-  // 1. Busca usuário
   const usuario = await UsuarioModel.findOne({ email });
 
-  // 2. Se não existe ou a senha não bate, lança o erro
-  // O catchAsync no controller vai pegar esse throw e mandar pro errorMiddleware
   if (!usuario || !(await bcrypt.compare(senha, usuario.senha_hash))) {
     throw new UnauthorizedError('E-mail ou senha incorretos.');
   }
@@ -76,16 +69,13 @@ export const login = async (data: any) => {
   return { user: usuario, token };
 };
 
-// --- NOVA FUNCIONALIDADE: ALTERAR SENHA ---
 export const updatePassword = async (userId: string, senhaAtual: string, novaSenha: string) => {
   const usuario = await UsuarioModel.findById(userId);
   if (!usuario) throw new NotFoundError('Usuário não encontrado.');
 
-  // Verifica se a senha atual está correta
   const senhaValida = await bcrypt.compare(senhaAtual, usuario.senha_hash);
   if (!senhaValida) throw new BadRequestError('Senha atual incorreta.');
 
-  // Gera novo hash e salva
   usuario.senha_hash = await bcrypt.hash(novaSenha, 10);
   await usuario.save();
 

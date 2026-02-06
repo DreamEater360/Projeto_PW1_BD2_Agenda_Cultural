@@ -12,7 +12,6 @@ export const UsuarioSchema = new Schema({
   },
   ativo: { type: Boolean, default: true },
 
-  // Campos de especialização do seu MER
   cnpj: { type: String },
   razao_social: { type: String },
   matricula_funcional: { type: String },
@@ -21,16 +20,13 @@ export const UsuarioSchema = new Schema({
   timestamps: true 
 });
 
-// Sanitização: Remove a senha ao converter para JSON (Front-end)
 UsuarioSchema.set('toJSON', {
-  // Tipamos o 'ret' como any para o TypeScript parar de reclamar
   transform: (_: any, ret: any) => {
     delete ret.senha_hash;
     return ret;
   }
 });
 
-// Sanitização: Remove a senha ao converter para objeto simples
 UsuarioSchema.set('toObject', {
   transform: (_: any, ret: any) => {
     delete ret.senha_hash;

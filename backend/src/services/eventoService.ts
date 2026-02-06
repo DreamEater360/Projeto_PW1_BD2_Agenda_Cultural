@@ -4,7 +4,6 @@ import { EventoModel } from '../models/Evento';
 import { neo4jDriver } from '../config/neo4j';
 import { BadRequestError, NotFoundError, ForbiddenError, ApiError } from '../errors/apiError';
 
-// SCHEMA ÚNICO DE VALIDAÇÃO (Reutilizável)
 const eventoSchema = z.object({
   titulo: z.string()
     .min(3, "O título deve ter pelo menos 3 caracteres")
@@ -19,13 +18,12 @@ const eventoSchema = z.object({
     return isNaN(parsed) ? 0 : parsed;
   }),
   categoria_id: z.string().min(1, "Selecione uma categoria"),
-  nome_local: z.string().min(2, "Informe o nome do local"),
-  longitude: z.any().transform((val) => parseFloat(val)),
-  latitude: z.any().transform((val) => parseFloat(val)),
+  nome_local: z.string().min(2, "Informe o nome do local").optional(),
+  longitude: z.any().transform((val) => parseFloat(val)).optional(),
+  latitude: z.any().transform((val) => parseFloat(val)).optional(),
 });
 
 export const create = async (data: unknown, usuario: { id: string, papel: string }, foto_url?: string) => {
-  // O .parse() joga um erro se os dados forem inválidos, que o errorMiddleware captura
   const validatedData = eventoSchema.parse(data);
 
   const statusInicial = (usuario.papel === 'ORGANIZADOR' || usuario.papel === 'ADMINISTRADOR') 
@@ -44,12 +42,11 @@ export const create = async (data: unknown, usuario: { id: string, papel: string
     status: statusInicial,
     localizacao: {
       type: 'Point',
-      coordinates: [validatedData.longitude, validatedData.latitude],
+      coordinates: [validatedData.longitude || null , validatedData.latitude as any],
       nome_local: validatedData.nome_local
     }
   });
 
-  // Persistência Poliglota (Neo4j)
   const session = neo4jDriver.session();
   try {
     await session.run(
@@ -123,7 +120,6 @@ export const toggleVisibility = async (eventoId: string, userId: string, userRol
 };
 
 export const remove = async (eventoId: string, userId: string) => {
-  // 1. Verificar se o evento existe e pertence ao organizador
   const evento = await EventoModel.findById(eventoId);
   
   if (!evento) throw new NotFoundError('Evento não encontrado.');
@@ -132,10 +128,8 @@ export const remove = async (eventoId: string, userId: string) => {
     throw new ForbiddenError('Você não tem permissão para excluir este evento.');
   }
 
-  // 2. Deletar do MongoDB
   await EventoModel.findByIdAndDelete(eventoId);
 
-  // 3. Deletar do Neo4j (Persistência Poliglota)
   const session = neo4jDriver.session();
   try {
     await session.run(

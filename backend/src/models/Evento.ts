@@ -32,7 +32,6 @@ const EventoSchema = new Schema({
   }
 }, { timestamps: true });
 
-// Índice vital para buscas geográficas e Leaflet
 EventoSchema.index({ localizacao: '2dsphere' });
 
 export const EventoModel = model('Evento', EventoSchema);

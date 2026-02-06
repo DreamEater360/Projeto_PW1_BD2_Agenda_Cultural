@@ -6,7 +6,6 @@ export const asyncHandler = (fn: Function) => (req: Request, res: Response, next
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-// Wrapper simples para evitar try/catch repetitivo
 const catchAsync = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
   fn(req, res, next).catch(next);
 };

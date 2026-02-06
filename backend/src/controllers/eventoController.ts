@@ -4,7 +4,7 @@ import { BadRequestError } from '../errors/apiError';
 
 export const indexByOrganizer = async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id; // ID vindo do Token
+    const userId = req.user!.id; 
     const eventos = await eventoService.listByOrganizer(userId);
     return res.json(eventos);
   } catch (error) {

@@ -13,7 +13,6 @@ export const errorMiddleware = (
   if (error instanceof ZodError) {
     return res.status(400).json({
       message: "Erro de validação nos dados enviados",
-      // AQUI: Troque .errors por .issues
       errors: error.issues.map(err => ({
         campo: err.path.join('.'),
         mensagem: err.message

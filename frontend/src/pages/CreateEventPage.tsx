@@ -4,7 +4,7 @@ import api from '../services/api';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
 import { MapPicker } from '../components/MapPicker';
-import { Search, Calendar, Clock, Send, Loader2, MapPin } from 'lucide-react';
+import { Search, Calendar, Clock, Send, Loader2, MapPin, ImagePlus, Link as LinkIcon } from 'lucide-react';
 import { useCurrentLocation } from '../hooks/useCurrentLocation';
 import '../styles/forms.css';
 
@@ -17,9 +17,10 @@ export function CreateEventPage() {
   const [loading, setLoading] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
   
+  // ESTADOS PARA IMAGEM
   const [foto, setFoto] = useState<File | null>(null);
   const [fotoUrlExterna, setFotoUrlExterna] = useState('');
-  const [usarLinkExterno, setUsarLinkExterno] = useState(false);
+  const [usarLinkExterno, setUsarLinkExterno] = useState(false); // Toggle entre Arquivo/Link
   
   const [nomeLocal, setNomeLocal] = useState('');
   const [coords, setCoords] = useState<{ lat: number, lng: number } | null>(null);
@@ -35,7 +36,6 @@ export function CreateEventPage() {
 
   const isCidadao = user?.papel === 'CIDADAO';
 
-  // Seta a localização inicial baseada no GPS do navegador
   useEffect(() => {
     if (!loadingGps && gpsCoords) {
       setCoords(gpsCoords);
@@ -47,44 +47,21 @@ export function CreateEventPage() {
     api.get('/categorias').then(res => setCategorias(res.data));
   }, []);
 
-  // --- FUNÇÃO DE BUSCA POR NOME (Reverse Geocoding) ---
   async function buscarNoMapa() {
     if (!nomeLocal.trim()) return;
-    
     setLoadingSearch(true);
     try {
-      // Usamos a API do OpenStreetMap para buscar as coordenadas pelo nome
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nomeLocal)}`
       );
       const data = await response.json();
-
       if (data && data.length > 0) {
-        const result = data[0];
-        const newCoords = {
-          lat: parseFloat(result.lat),
-          lng: parseFloat(result.lon)
-        };
-        setCoords(newCoords);
-        // Opcional: Atualiza o nome com o endereço completo retornado pela API
-        // setNomeLocal(result.display_name); 
-      } else {
-        alert("Local não encontrado. Tente adicionar o nome da cidade (ex: Praça Matriz, Sousa).");
+        setCoords({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
       }
-    } catch (error) {
-      alert("Erro ao pesquisar localização no serviço de mapas.");
     } finally {
       setLoadingSearch(false);
     }
   }
-
-  // Permite dar 'Enter' no campo de busca
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      buscarNoMapa();
-    }
-  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -104,6 +81,7 @@ export function CreateEventPage() {
       data.append('latitude', String(coords.lat));
       data.append('longitude', String(coords.lng));
 
+      // LÓGICA DE FOTO PARA O BACKEND
       if (usarLinkExterno) {
         data.append('foto_url_externa', fotoUrlExterna);
       } else if (foto) {
@@ -111,13 +89,10 @@ export function CreateEventPage() {
       }
 
       await api.post('/events', data);
-      alert(isCidadao ? "Sugestão enviada para análise!" : "Evento publicado!");
+      alert(isCidadao ? "Sugestão enviada com sucesso! ✨" : "Evento publicado! 🎭");
       navigate('/events');
     } catch (err: any) {
-      const erros = err.response?.data?.errors 
-        ? err.response.data.errors.map((e: any) => e.mensagem).join('\n')
-        : "Erro ao publicar.";
-      alert(erros);
+      alert("Erro ao publicar evento. Verifique os campos.");
     } finally {
       setLoading(false);
     }
@@ -130,18 +105,18 @@ export function CreateEventPage() {
       <main style={{ flex: 1, padding: '40px 20px' }}>
         <div className="form-container">
           <h2 style={{ color: 'var(--purple)', textAlign: 'left', marginBottom: '30px' }}>
-            {isCidadao ? 'Sugerir Evento' : 'Anunciar Novo Evento'}
+            {isCidadao ? 'Sugerir Novo Evento' : 'Anunciar Novo Evento'}
           </h2>
           
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>TÍTULO</label>
-              <input type="text" required minLength={3} onChange={e => setFormData({...formData, titulo: e.target.value})} />
+              <input type="text" required onChange={e => setFormData({...formData, titulo: e.target.value})} />
             </div>
 
             <div className="form-group">
               <label>DESCRIÇÃO</label>
-              <textarea required minLength={10} onChange={e => setFormData({...formData, descricao: e.target.value})} />
+              <textarea required onChange={e => setFormData({...formData, descricao: e.target.value})} />
             </div>
 
             <div className="form-row">
@@ -164,48 +139,66 @@ export function CreateEventPage() {
                 </select>
               </div>
               <div className="form-group">
-                <label>VALOR (R$)</label>
-                <input type="number" step="0.01" min="0" onChange={e => setFormData({...formData, valor_ingresso: e.target.value})} />
+                <label>VALOR DO INGRESSO (R$)</label>
+                <input type="number" step="0.01" onChange={e => setFormData({...formData, valor_ingresso: e.target.value})} />
               </div>
             </div>
 
-            {/* SEÇÃO DE LOCALIZAÇÃO REFORMULADA */}
+            {/* SEÇÃO DE FOTO CORRIGIDA */}
             <div className="form-group">
-              <label>ONDE VAI SER? (NOME DO LOCAL)</label>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                <div style={{ position: 'relative', flex: 1 }}>
-                  <MapPin size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                  <input 
-                    type="text" 
-                    placeholder="Ex: Praça do Coreto, Cajazeiras" 
-                    style={{ paddingLeft: '45px' }}
-                    value={nomeLocal} 
-                    required
-                    onKeyDown={handleKeyPress}
-                    onChange={e => setNomeLocal(e.target.value)} 
-                  />
-                </div>
+              <label>IMAGEM DO EVENTO</label>
+              
+              <div className="role-selector" style={{ marginBottom: '15px' }}>
                 <button 
                   type="button" 
-                  onClick={buscarNoMapa} 
-                  disabled={loadingSearch}
-                  className="btn-purple" 
-                  style={{ width: '60px',marginTop: '10px', borderRadius: '16px', display: 'flex', justifyContent: 'base-line', alignItems: 'center' }}
+                  className={`role-btn ${!usarLinkExterno ? 'active' : ''}`}
+                  onClick={() => setUsarLinkExterno(false)}
                 >
-                   {loadingSearch ? <Loader2 className="spinner" size={20} /> : <Search size={20} />}
+                  <ImagePlus size={16} /> Upload
                 </button>
+                
               </div>
 
+              {usarLinkExterno ? (
+                <input 
+                  type="url" 
+                  placeholder="Cole aqui a URL da imagem (https://...)" 
+                  value={fotoUrlExterna}
+                  onChange={e => setFotoUrlExterna(e.target.value)}
+                  className="input-link"
+                />
+              ) : (
+                <div className="file-input-wrapper">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={e => setFoto(e.target.files![0])} 
+                  />
+                  {foto && <p style={{fontSize: '12px', color: 'var(--purple)', marginTop: '10px'}}>✓ {foto.name}</p>}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <label>ONDE SERÁ O EVENTO?</label>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <input 
+                  type="text" 
+                  placeholder="Nome do local" 
+                  value={nomeLocal} 
+                  onChange={e => setNomeLocal(e.target.value)} 
+                />
+                <button type="button" onClick={buscarNoMapa} className="btn-purple" style={{ width: '60px', marginTop: '10px', borderRadius: '16px' }}>
+                   <Search size={20} />
+                </button>
+              </div>
               <div className="map-picker-container">
                 <MapPicker targetCoords={coords} onLocationSelect={(lat, lng) => setCoords({ lat, lng })} />
               </div>
-              <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px', textAlign: 'left' }}>
-                💡 <b>Dica:</b> Digite o nome do local e clique na lupa. Você também pode clicar diretamente no mapa para ajustar o ponto.
-              </p>
             </div>
 
-            <button className="btn-main" type="submit" disabled={loading} style={{ marginTop: '30px' }}>
-              {loading ? <Loader2 className="spinner" /> : <><Send size={18}/> {isCidadao ? 'Enviar Sugestão' : 'Publicar Evento'}</>}
+            <button className="btn-main" type="submit" disabled={loading} style={{marginTop: '30px'}}>
+              {loading ? <Loader2 className="spinner" /> : (isCidadao ? 'Enviar Sugestão' : 'Publicar Evento')}
             </button>
           </form>
         </div>

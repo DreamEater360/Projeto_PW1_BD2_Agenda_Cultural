@@ -4,7 +4,7 @@ import { BadRequestError } from '../errors/apiError';
 
 export const store = async (req: Request, res: Response) => {
   const { eventoId } = req.body;
-  const userId = req.user?.id; // Pegamos do token via authMiddleware
+  const userId = req.user?.id; 
 
   if (!userId) throw new BadRequestError('Usuário não autenticado.');
   if (!eventoId) throw new BadRequestError('ID do evento é obrigatório.');

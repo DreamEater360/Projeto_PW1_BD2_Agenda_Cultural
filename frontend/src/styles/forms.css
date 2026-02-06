@@ -123,3 +123,7 @@ select:focus,
     padding: 28px 24px;
   }
 }
+.input-link {
+  border: 2px solid var(--purple) !important;
+  background: white !important;
+}
